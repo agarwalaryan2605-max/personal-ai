@@ -1,0 +1,30 @@
+{
+  "name": "personal-ai",
+  "version": "1.0.0",
+  "description": "AI Stock Market Intelligence & Analysis Terminal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "stock-market",
+    "ai",
+    "tradingview",
+    "chartink",
+    "gemini",
+    "claude",
+    "deepseek"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.0",
+    "@google/generative-ai": "^0.21.0",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

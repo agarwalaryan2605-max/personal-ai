@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Stock AI Terminal | Multi-Model Financial Intelligence</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- TradingView Widget Script -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <!-- Marked Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="dark-theme">
+
+  <div class="terminal-layout">
+    
+    <!-- Top Header Bar -->
+    <header class="terminal-header">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-logo"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="brand-info">
+            <h1>Stock AI Terminal</h1>
+            <span class="badge live-status"><i class="fa-solid fa-signal"></i> System 1 Active</span>
+          </div>
+        </div>
+
+        <!-- Ticker Search Bar -->
+        <form class="search-form" id="searchForm">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input 
+              type="text" 
+              id="tickerInput" 
+              placeholder="Search Stock (e.g. TATAMOTORS, RELIANCE, NVDA)..." 
+              autocomplete="off"
+            >
+            <button type="button" class="voice-btn" id="voiceBtn" title="Hinglish Voice Search">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+          </div>
+          <button type="submit" class="analyze-btn" id="analyzeBtn">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Stock
+          </button>
+        </form>
+      </div>
+
+      <div class="header-right">
+        <!-- AI Model Switcher -->
+        <div class="selector-box">
+          <i class="fa-solid fa-brain"></i>
+          <select id="aiModelSelect" class="clean-select">
+            <option value="gemini">Google Gemini 1.5</option>
+            <option value="claude">Anthropic Claude 3.5</option>
+          </select>
+        </div>
+
+        <!-- Investment Mode Switcher -->
+        <div class="selector-box">
+          <i class="fa-solid fa-layer-group"></i>
+          <select id="investModeSelect" class="clean-select">
+            <option value="delivery">📦 Delivery / Swing</option>
+            <option value="mf">🏛️ Mutual Fund & SIP</option>
+            <option value="intraday">⚡ Intraday Breakout</option>
+          </select>
+        </div>
+
+        <!-- Settings Button -->
+        <button class="header-icon-btn" id="openSettingsBtn" title="API Settings">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Watchlist Quick Ticker Tape -->
+    <div class="ticker-tape">
+      <div class="tape-item" onclick="loadStock('TATAMOTORS')">
+        <span class="symbol">TATAMOTORS</span>
+        <span class="price">₹975.40</span>
+        <span class="change positive">+2.15%</span>
+      </div>
+      <div class="tape-item" onclick="loadStock('RELIANCE')">
+        <span class="symbol">RELIANCE</span>
+        <span class="price">₹2950.25</span>
+        <span class="change positive">+1.45%</span>
+      </div>
+      <div class="tape-item" onclick="loadStock('INFY')">
+        <span class="symbol">INFY</span>
+        <span class="price">₹1890.50</span>
+        <span class="change negative">-0.35%</span>
+      </div>
+      <div class="tape-item" onclick="loadStock('TCS')">
+        <span class="symbol">TCS</span>
+        <span class="price">₹4180.10</span>
+        <span class="change positive">+0.85%</span>
+      </div>
+      <div class="tape-item" onclick="loadStock('NVDA')">
+        <span class="symbol">NVDA</span>
+        <span class="price">$125.80</span>
+        <span class="change positive">+3.40%</span>
+      </div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <main class="workspace-grid">
+      
+      <!-- Left Column: TradingView Live Interactive Chart -->
+      <section class="chart-section">
+        <div class="section-bar">
+          <div class="chart-title">
+            <i class="fa-solid fa-chart-candlestick"></i>
+            <span id="activeStockTitle">TATAMOTORS (NSE) - TradingView Live</span>
+          </div>
+          <div class="timeframe-buttons">
+            <button class="tf-btn active" data-tf="D">1D</button>
+            <button class="tf-btn" data-tf="W">1W</button>
+            <button class="tf-btn" data-tf="M">1M</button>
+          </div>
+        </div>
+
+        <!-- TradingView Widget Container -->
+        <div id="tradingview_chart_container" class="chart-container"></div>
+      </section>
+
+      <!-- Right Column: AI Signal & Traffic Light Verdict Panel -->
+      <section class="ai-signal-section">
+        
+        <!-- Signal Header & Traffic Light Badge -->
+        <div class="verdict-card" id="verdictCard">
+          <div class="verdict-header">
+            <span class="verdict-label">AI Decision & Signal</span>
+            <div class="traffic-light-badge green" id="trafficBadge">
+              <span class="light-dot"></span>
+              <span id="verdictText">🟢 STRONG BUY</span>
+            </div>
+          </div>
+
+          <!-- Stock Price Summary -->
+          <div class="stock-price-row">
+            <div>
+              <h2 id="stockSymbolText">TATAMOTORS</h2>
+              <div class="price-val" id="stockPriceText">₹975.40 <span class="change positive" id="stockChangeText">+2.15%</span></div>
+            </div>
+            <div class="confidence-box">
+              <span class="conf-num" id="confScoreText">88%</span>
+              <span class="conf-lbl">AI Confidence</span>
+            </div>
+          </div>
+
+          <!-- Key Actionable Levels Grid -->
+          <div class="levels-grid">
+            <div class="level-box">
+              <span class="lbl">Entry Zone</span>
+              <span class="val" id="entryZoneText">₹965 - ₹978</span>
+            </div>
+            <div class="level-box">
+              <span class="lbl">Target 1 (50% Lock)</span>
+              <span class="val green-text" id="target1Text">₹1,045.00</span>
+            </div>
+            <div class="level-box">
+              <span class="lbl">Target 2 (Final)</span>
+              <span class="val green-text" id="target2Text">₹1,120.00</span>
+            </div>
+            <div class="level-box">
+              <span class="lbl">Stop Loss</span>
+              <span class="val red-text" id="stopLossText">₹930.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Indicators Quick Bar -->
+        <div class="indicators-bar">
+          <div class="ind-pill" id="pillRsi">RSI(14): <strong>64.2</strong></div>
+          <div class="ind-pill" id="pillWeeklyRsi">Weekly RSI: <strong>66.8</strong></div>
+          <div class="ind-pill" id="pill200Sma">200 SMA: <strong>Above ✅</strong></div>
+          <div class="ind-pill" id="pillSystem1">Chartink System 1: <strong>Matched ✅</strong></div>
+        </div>
+
+        <!-- AI Deep Reasoning & Exit Strategy Markdown -->
+        <div class="ai-analysis-content" id="aiAnalysisContent">
+          <!-- Dynamic Markdown Rendered Content -->
+        </div>
+
+      </section>
+    </main>
+
+    <!-- Bottom Feature Tabs Section -->
+    <section class="bottom-features-section">
+      <div class="tab-header-bar">
+        <button class="tab-btn active" data-tab="topPicksTab">
+          <i class="fa-solid fa-fire"></i> Mode B: Auto Top AI Picks (System 1)
+        </button>
+        <button class="tab-btn" data-tab="chartinkTab">
+          <i class="fa-solid fa-link"></i> Chartink URL Parser
+        </button>
+        <button class="tab-btn" data-tab="portfolioTab">
+          <i class="fa-solid fa-wallet"></i> My Portfolio & Exit Alerts
+        </button>
+      </div>
+
+      <div class="tab-body">
+        
+        <!-- Tab 1: Auto AI Top Picks (Mode B) -->
+        <div class="tab-pane active" id="topPicksTab">
+          <div class="pane-intro">
+            <h3>🤖 Auto Market Discovery - Daily System 1 Screener Picks</h3>
+            <p>Calculated using <strong>Weekly RSI > 60, Monthly RSI > 60, Volume >= 100k, and 200 SMA</strong> filters.</p>
+          </div>
+          <div class="picks-cards-grid" id="topPicksGrid">
+            <!-- Dynamic Pick Cards -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Custom Chartink URL Parser -->
+        <div class="tab-pane" id="chartinkTab">
+          <div class="pane-intro">
+            <h3>🔍 Dynamic Chartink Screener Parser</h3>
+            <p>Paste any Chartink URL to import its custom formula & scanning conditions directly into your AI.</p>
+          </div>
+          <form class="url-parser-form" id="chartinkForm">
+            <input 
+              type="text" 
+              id="chartinkUrlInput" 
+              placeholder="Paste Chartink Screener Link (e.g. https://chartink.com/screener/copy-copy-copy-system-1-scanner-2)..." 
+              value="https://chartink.com/screener/copy-copy-copy-system-1-scanner-2"
+            >
+            <button type="submit" class="btn primary"><i class="fa-solid fa-download"></i> Import Rules</button>
+          </form>
+          <div id="chartinkOutput" class="chartink-result-box"></div>
+        </div>
+
+        <!-- Tab 3: My Portfolio & Exit Alerts -->
+        <div class="tab-pane" id="portfolioTab">
+          <div class="pane-intro">
+            <h3>💼 My Portfolio & Trailing Stop-Loss Alerts</h3>
+            <p>Add your stock/mutual fund holdings. AI will alert you when Target 1/Target 2 or Exit levels are hit!</p>
+          </div>
+          <form class="add-holding-form" id="holdingForm">
+            <input type="text" id="holdSymbol" placeholder="Stock Name (e.g. TATAMOTORS)" required>
+            <input type="number" id="holdBuyPrice" placeholder="Buy Price (₹)" step="0.1" required>
+            <input type="number" id="holdQty" placeholder="Quantity" value="10" required>
+            <button type="submit" class="btn primary"><i class="fa-solid fa-plus"></i> Add Holding</button>
+          </form>
+
+          <div class="holdings-list-wrapper">
+            <div class="alerts-container" id="alertsContainer"></div>
+            <table class="holdings-table">
+              <thead>
+                <tr>
+                  <th>Stock</th>
+                  <th>Buy Price</th>
+                  <th>Qty</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="holdingsTableBody">
+                <!-- Holdings Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-sliders"></i> API Settings & Render Keys</h3>
+        <button class="modal-close-btn" id="closeSettingsModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="desc">Save your Gemini & Claude API keys locally or configure them on Render.com environment variables.</p>
+        
+        <div class="form-group">
+          <label>Google Gemini API Key:</label>
+          <input type="password" id="geminiKeyInput" placeholder="AIzaSy...">
+          <a href="https://aistudio.google.com/" target="_blank" class="link">Get Free Key &rarr;</a>
+        </div>
+
+        <div class="form-group">
+          <label>Anthropic Claude API Key:</label>
+          <input type="password" id="claudeKeyInput" placeholder="sk-ant-api...">
+          <a href="https://console.anthropic.com/" target="_blank" class="link">Get Key &rarr;</a>
+        </div>
+
+        <div id="settingsFeedback" class="feedback-msg"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" id="cancelSettingsBtn">Close</button>
+        <button class="btn primary" id="saveSettingsBtn">Save Keys</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
