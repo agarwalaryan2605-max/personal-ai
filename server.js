@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const { getStockQuoteAndIndicators } = require('./services/stockDataService');
+const { getStockQuoteAndIndicators, searchStocks } = require('./services/stockDataService');
 const { parseChartinkURL, getTopSystem1Picks, SYSTEM_1_RULES } = require('./services/chartinkParser');
 const { evaluatePortfolioAlerts } = require('./services/portfolioService');
 const { analyzeStockWithAI } = require('./services/aiAnalysisEngine');
@@ -16,7 +16,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 1. API Key Status Endpoint
+// 1. Live Stock Search Autocomplete Endpoint
+app.get('/api/stock/search', async (req, res) => {
+  try {
+    const query = req.query.q || '';
+    const results = await searchStocks(query);
+    res.json({ success: true, results });
+  } catch (error) {
+    res.status(500).json({ error: 'Search error: ' + error.message });
+  }
+});
+
+// 2. API Key Status Endpoint
 app.get('/api/status', (req, res) => {
   res.json({
     geminiConfigured: !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()),
@@ -26,7 +37,7 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// 2. Save API Keys from UI Settings Modal
+// 3. Save API Keys from UI Settings Modal
 app.post('/api/settings', (req, res) => {
   try {
     const { geminiKey, groqKey, claudeKey } = req.body;
@@ -45,7 +56,7 @@ app.post('/api/settings', (req, res) => {
   }
 });
 
-// 3. Fetch Stock Quote & Indicators
+// 4. Fetch Stock Quote & Indicators
 app.get('/api/stock/quote/:symbol', async (req, res) => {
   try {
     const symbol = req.params.symbol;
@@ -56,7 +67,7 @@ app.get('/api/stock/quote/:symbol', async (req, res) => {
   }
 });
 
-// 4. Mode A: Deep AI Analysis Endpoint (User Ticker Input)
+// 5. Mode A: Deep AI Analysis Endpoint (User Ticker Input)
 app.post('/api/stock/analyze', async (req, res) => {
   try {
     const { symbol, mode = 'delivery', provider = 'ensemble' } = req.body;
@@ -83,7 +94,7 @@ app.post('/api/stock/analyze', async (req, res) => {
   }
 });
 
-// 5. Mode B: Auto Market Discovery & Daily Top Picks (Chartink System 1 Scanner)
+// 6. Mode B: Auto Market Discovery & Daily Top Picks (Chartink System 1 Scanner)
 app.get('/api/stock/top-picks', (req, res) => {
   try {
     const picks = getTopSystem1Picks();
@@ -97,7 +108,7 @@ app.get('/api/stock/top-picks', (req, res) => {
   }
 });
 
-// 6. Dynamic Chartink URL Parser Endpoint
+// 7. Dynamic Chartink URL Parser Endpoint
 app.post('/api/stock/parse-chartink', async (req, res) => {
   try {
     const { url } = req.body;
@@ -113,7 +124,7 @@ app.post('/api/stock/parse-chartink', async (req, res) => {
   }
 });
 
-// 7. Portfolio Exit & Trailing SL Alerts Evaluator
+// 8. Portfolio Exit & Trailing SL Alerts Evaluator
 app.post('/api/portfolio/alerts', async (req, res) => {
   try {
     const { holdings = [] } = req.body;

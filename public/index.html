@@ -26,19 +26,20 @@
           </div>
         </div>
 
-        <!-- Ticker Search Bar -->
+        <!-- Ticker Search Bar with Autocomplete Dropdown -->
         <form class="search-form" id="searchForm">
           <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
             <input 
               type="text" 
               id="tickerInput" 
-              placeholder="Search Stock (e.g. TATAMOTORS, RELIANCE, NVDA)..." 
+              placeholder="Search Stock or Company (e.g. Tata Motors, Reliance, Nifty, NVDA)..." 
               autocomplete="off"
             >
             <button type="button" class="voice-btn" id="voiceBtn" title="Hinglish Voice Search">
               <i class="fa-solid fa-microphone"></i>
             </button>
+            <div id="searchDropdown" class="search-dropdown"></div>
           </div>
           <button type="submit" class="analyze-btn" id="analyzeBtn">
             <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Stock

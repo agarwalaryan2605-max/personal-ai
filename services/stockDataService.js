@@ -1,26 +1,97 @@
 const axios = require('axios');
 
 /**
- * Stock Data Service - Fetches live quote & technical indicators
- * Supports NSE/BSE Indian stocks (e.g. TATAMOTORS.NS, RELIANCE.NS) and US stocks (AAPL, NVDA, TSLA)
+ * Top Indian NSE/BSE & US Stocks Index for Fast Autocomplete
  */
+const POPULAR_STOCKS = [
+  { symbol: 'TATAMOTORS', name: 'Tata Motors Limited', exchange: 'NSE' },
+  { symbol: 'RELIANCE', name: 'Reliance Industries Ltd', exchange: 'NSE' },
+  { symbol: 'TCS', name: 'Tata Consultancy Services Ltd', exchange: 'NSE' },
+  { symbol: 'INFY', name: 'Infosys Limited', exchange: 'NSE' },
+  { symbol: 'HDFCBANK', name: 'HDFC Bank Limited', exchange: 'NSE' },
+  { symbol: 'ICICIBANK', name: 'ICICI Bank Limited', exchange: 'NSE' },
+  { symbol: 'SBIN', name: 'State Bank of India', exchange: 'NSE' },
+  { symbol: 'BHARTIARTL', name: 'Bharti Airtel Limited', exchange: 'NSE' },
+  { symbol: 'ITC', name: 'ITC Limited', exchange: 'NSE' },
+  { symbol: 'LT', name: 'Larsen & Toubro Ltd', exchange: 'NSE' },
+  { symbol: 'BAJFINANCE', name: 'Bajaj Finance Limited', exchange: 'NSE' },
+  { symbol: 'ZOMATO', name: 'Zomato Limited', exchange: 'NSE' },
+  { symbol: 'SUZLON', name: 'Suzlon Energy Limited', exchange: 'NSE' },
+  { symbol: 'BHEL', name: 'Bharat Heavy Electricals Ltd', exchange: 'NSE' },
+  { symbol: 'NIFTYBEES', name: 'Nippon India ETF Nifty BeES', exchange: 'NSE' },
+  { symbol: 'PARAG PARIKH FLEXI CAP', name: 'Parag Parikh Flexi Cap Fund', exchange: 'MUTUAL_FUND' },
+  { symbol: 'NVDA', name: 'NVIDIA Corporation', exchange: 'NASDAQ' },
+  { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NASDAQ' },
+  { symbol: 'TSLA', name: 'Tesla Inc.', exchange: 'NASDAQ' },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', exchange: 'NASDAQ' }
+];
+
+/**
+ * Live Stock & Mutual Fund Search Autocomplete API
+ */
+async function searchStocks(query) {
+  if (!query || query.trim().length < 1) return [];
+  const q = query.trim().toLowerCase();
+
+  // 1. Filter local fast index
+  const localMatches = POPULAR_STOCKS.filter(s => 
+    s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+  );
+
+  // 2. Fetch live results from Yahoo Finance Search API
+  try {
+    const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=8&newsCount=0`;
+    const res = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      timeout: 4000
+    });
+
+    const yahooQuotes = res.data?.quotes || [];
+    const remoteMatches = yahooQuotes
+      .filter(item => item.symbol && (item.quoteType === 'EQUITY' || item.quoteType === 'MUTUALFUND' || item.quoteType === 'ETF'))
+      .map(item => ({
+        symbol: item.symbol.replace('.NS', '').replace('.BO', ''),
+        fullSymbol: item.symbol,
+        name: item.shortname || item.longname || item.symbol,
+        exchange: item.exchange || 'NSE'
+      }));
+
+    const combined = [...localMatches, ...remoteMatches];
+    const unique = [];
+    const seen = new Set();
+
+    for (const item of combined) {
+      const sym = item.symbol.toUpperCase();
+      if (!seen.has(sym)) {
+        seen.add(sym);
+        unique.push(item);
+      }
+    }
+
+    return unique.slice(0, 10);
+
+  } catch (err) {
+    return localMatches.slice(0, 8);
+  }
+}
+
+// Get clean display name
+function getDisplayName(symbol) {
+  return symbol.replace('.NS', '').replace('.BO', '');
+}
 
 // Format symbol for Yahoo Finance API
 function formatSymbol(symbol) {
   let s = symbol.trim().toUpperCase();
   if (!s.includes('.') && !s.startsWith('^')) {
-    // If it looks like Indian stock without extension, default to .NS (NSE)
     const usTickers = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AMD', 'NFLX'];
     if (!usTickers.includes(s)) {
       s = `${s}.NS`;
     }
   }
   return s;
-}
-
-// Get clean display name
-function getDisplayName(symbol) {
-  return symbol.replace('.NS', '').replace('.BO', '');
 }
 
 /**
@@ -31,11 +102,10 @@ async function getStockQuoteAndIndicators(symbolInput) {
   const displayName = getDisplayName(symbol);
 
   try {
-    // Fetch 1 year chart data from Yahoo Finance API
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d`;
     const response = await axios.get(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       },
       timeout: 8000
     });
@@ -47,7 +117,6 @@ async function getStockQuoteAndIndicators(symbolInput) {
 
     const meta = result.meta;
     const quote = result.indicators.quote[0];
-    const timestamp = result.timestamp;
 
     const closes = quote.close.filter(c => c !== null);
     const volumes = quote.volume.filter(v => v !== null);
@@ -60,10 +129,7 @@ async function getStockQuoteAndIndicators(symbolInput) {
     const changePercent = (change / previousClose) * 100;
     const currentVolume = volumes[volumes.length - 1] || 0;
 
-    // 1. Calculate RSI (14 period)
     const rsi14 = calculateRSI(closes, 14);
-
-    // 2. Calculate Weekly & Monthly RSI approximations
     const weeklyCloses = getSampledCloses(closes, 5);
     const weeklyRsi = calculateRSI(weeklyCloses, 14);
 
@@ -71,16 +137,11 @@ async function getStockQuoteAndIndicators(symbolInput) {
     const monthlyRsi = calculateRSI(monthlyCloses, 14);
     const oneMonthAgoMonthlyRsi = calculateRSI(monthlyCloses.slice(0, -1), 14);
 
-    // 3. Calculate 200 SMA & 50 SMA
     const sma200 = calculateSMA(closes, 200);
     const sma50 = calculateSMA(closes, 50);
     const sma20 = calculateSMA(closes, 20);
-
-    // 4. Calculate MACD (12, 26, 9)
     const macdData = calculateMACD(closes);
 
-    // 5. Check Chartink System 1 Criteria
-    // Criteria: Weekly RSI > 60, Monthly RSI > 60, Volume >= 100,000, Close > 200 SMA
     const passesSystem1 = (
       weeklyRsi > 58 &&
       oneMonthAgoMonthlyRsi > 55 &&
@@ -120,7 +181,6 @@ async function getStockQuoteAndIndicators(symbolInput) {
   }
 }
 
-// Calculate RSI (Relative Strength Index)
 function calculateRSI(closes, period = 14) {
   if (!closes || closes.length < period + 1) return 50;
 
@@ -141,7 +201,6 @@ function calculateRSI(closes, period = 14) {
   return 100 - (100 / (1 + rs));
 }
 
-// Calculate Simple Moving Average
 function calculateSMA(closes, period) {
   if (!closes || closes.length < period) return closes[closes.length - 1] || 0;
   const slice = closes.slice(-period);
@@ -149,12 +208,11 @@ function calculateSMA(closes, period) {
   return sum / period;
 }
 
-// Calculate MACD
 function calculateMACD(closes) {
   const ema12 = calculateEMA(closes, 12);
   const ema26 = calculateEMA(closes, 26);
   const macdLine = ema12 - ema26;
-  const signalLine = macdLine * 0.85; // Simplified signal calculation
+  const signalLine = macdLine * 0.85;
   return {
     macd: macdLine,
     signal: signalLine,
@@ -162,7 +220,6 @@ function calculateMACD(closes) {
   };
 }
 
-// Exponential Moving Average
 function calculateEMA(closes, period) {
   if (!closes || closes.length === 0) return 0;
   const k = 2 / (period + 1);
@@ -173,7 +230,6 @@ function calculateEMA(closes, period) {
   return ema;
 }
 
-// Sample closes for weekly/monthly approximation
 function getSampledCloses(closes, step) {
   const result = [];
   for (let i = 0; i < closes.length; i += step) {
@@ -182,7 +238,6 @@ function getSampledCloses(closes, step) {
   return result;
 }
 
-// Fallback estimation if network API is blocked
 function getFallbackStockQuote(symbolInput) {
   const clean = symbolInput.trim().toUpperCase().replace('.NS', '');
   const mockPrices = {
@@ -199,7 +254,7 @@ function getFallbackStockQuote(symbolInput) {
   const basePrice = mockPrices[clean] || (Math.floor(Math.random() * 800) + 150);
   const change = (Math.random() * 20 - 8);
   const changePercent = (change / basePrice) * 100;
-  const rsi = Math.floor(Math.random() * 30) + 45; // 45 to 75
+  const rsi = Math.floor(Math.random() * 30) + 45;
 
   return {
     symbol: clean,
@@ -229,6 +284,7 @@ function getFallbackStockQuote(symbolInput) {
 }
 
 module.exports = {
+  searchStocks,
   getStockQuoteAndIndicators,
   formatSymbol,
   getDisplayName

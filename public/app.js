@@ -201,9 +201,111 @@ async function fetchTopPicks() {
 
 // Event Listeners Setup
 function setupEventListeners() {
-  // Search Form
+  const searchDropdown = document.getElementById('searchDropdown');
+  let selectedIndex = -1;
+  let searchTimeout = null;
+
+  // Search Input Autocomplete Handler
+  tickerInput.addEventListener('input', () => {
+    const query = tickerInput.value.trim();
+    clearTimeout(searchTimeout);
+
+    if (query.length < 1) {
+      if (searchDropdown) {
+        searchDropdown.classList.remove('active');
+        searchDropdown.innerHTML = '';
+      }
+      return;
+    }
+
+    searchTimeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/stock/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        if (data.results && data.results.length > 0) {
+          renderSearchDropdown(data.results);
+        } else {
+          if (searchDropdown) searchDropdown.classList.remove('active');
+        }
+      } catch (err) {
+        console.warn('Autocomplete search failed:', err);
+      }
+    }, 200);
+  });
+
+  // Render Autocomplete Dropdown List
+  function renderSearchDropdown(results) {
+    if (!searchDropdown) return;
+    searchDropdown.innerHTML = '';
+    selectedIndex = -1;
+
+    results.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'dropdown-item';
+      div.dataset.index = idx;
+      div.innerHTML = `
+        <div class="item-left">
+          <span class="item-symbol">${item.symbol}</span>
+          <span class="item-name">${item.name}</span>
+        </div>
+        <span class="item-badge">${item.exchange || 'NSE'}</span>
+      `;
+
+      div.onclick = (e) => {
+        e.stopPropagation();
+        tickerInput.value = item.symbol;
+        searchDropdown.classList.remove('active');
+        loadStock(item.symbol);
+      };
+
+      searchDropdown.appendChild(div);
+    });
+
+    searchDropdown.classList.add('active');
+  }
+
+  // Keyboard navigation for search dropdown
+  tickerInput.addEventListener('keydown', (e) => {
+    const items = searchDropdown ? searchDropdown.querySelectorAll('.dropdown-item') : [];
+    if (!searchDropdown || !searchDropdown.classList.contains('active') || items.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+      highlightDropdownItem(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, 0);
+      highlightDropdownItem(items);
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault();
+      items[selectedIndex].click();
+    }
+  });
+
+  function highlightDropdownItem(items) {
+    items.forEach((it, idx) => {
+      if (idx === selectedIndex) {
+        it.classList.add('selected');
+        it.scrollIntoView({ block: 'nearest' });
+      } else {
+        it.classList.remove('selected');
+      }
+    });
+  }
+
+  // Close dropdown on click outside
+  document.addEventListener('click', (e) => {
+    if (searchDropdown && !e.target.closest('.search-input-wrapper')) {
+      searchDropdown.classList.remove('active');
+    }
+  });
+
+  // Search Form Submit
   searchForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (searchDropdown) searchDropdown.classList.remove('active');
     const symbol = tickerInput.value.trim();
     if (symbol) loadStock(symbol);
   });
