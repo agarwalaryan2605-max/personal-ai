@@ -20,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api/status', (req, res) => {
   res.json({
     geminiConfigured: !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()),
+    groqConfigured: !!(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()),
     claudeConfigured: !!(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.trim()),
     system1Rules: SYSTEM_1_RULES
   });
@@ -28,13 +29,14 @@ app.get('/api/status', (req, res) => {
 // 2. Save API Keys from UI Settings Modal
 app.post('/api/settings', (req, res) => {
   try {
-    const { geminiKey, claudeKey } = req.body;
+    const { geminiKey, groqKey, claudeKey } = req.body;
     const envPath = path.join(__dirname, '.env');
     
     if (geminiKey !== undefined) process.env.GEMINI_API_KEY = geminiKey.trim();
+    if (groqKey !== undefined) process.env.GROQ_API_KEY = groqKey.trim();
     if (claudeKey !== undefined) process.env.ANTHROPIC_API_KEY = claudeKey.trim();
 
-    const envContent = `PORT=${PORT}\nGEMINI_API_KEY=${process.env.GEMINI_API_KEY || ''}\nANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY || ''}\n`;
+    const envContent = `PORT=${PORT}\nGEMINI_API_KEY=${process.env.GEMINI_API_KEY || ''}\nGROQ_API_KEY=${process.env.GROQ_API_KEY || ''}\nANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY || ''}\n`;
     fs.writeFileSync(envPath, envContent, 'utf8');
 
     res.json({ success: true, message: 'API Keys saved successfully!' });
@@ -57,7 +59,7 @@ app.get('/api/stock/quote/:symbol', async (req, res) => {
 // 4. Mode A: Deep AI Analysis Endpoint (User Ticker Input)
 app.post('/api/stock/analyze', async (req, res) => {
   try {
-    const { symbol, mode = 'delivery', provider = 'gemini' } = req.body;
+    const { symbol, mode = 'delivery', provider = 'ensemble' } = req.body;
 
     if (!symbol || !symbol.trim()) {
       return res.status(400).json({ error: 'Stock ticker or name is required.' });

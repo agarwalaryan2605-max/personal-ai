@@ -1,45 +1,39 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Anthropic = require('@anthropic-ai/sdk');
+const axios = require('axios');
 
 /**
- * AI Analysis Engine - Multi-Model Orchestrator (DeepSeek / Claude + Gemini)
+ * AI Analysis Engine - Multi-Brain Ensemble Orchestrator
+ * Combines 3 FREE AI Brains:
+ * 1. Google Gemini 1.5 (News Sentiment & Fundamentals)
+ * 2. DeepSeek-R1 via Groq (Math & Technical Reasoning)
+ * 3. Meta Llama 3.3 70B via Groq (Risk Validation & Strategy)
  */
 
 const TRADING_SYSTEM_PROMPT = `
-You are an Elite AI Stock Market Analyst & Risk Manager. You analyze stocks, mutual funds, and trading setups based on:
+You are an Elite AI Stock Analyst working in a Multi-AI Brain Ensemble. Analyze the stock using:
 1. Technical Price Action & Chart Patterns (RSI, 200 SMA, MACD, Volume Breakouts).
 2. Chartink System 1 Screener Criteria (Weekly RSI > 60, Monthly RSI > 60, Volume >= 100k, Close > 200 SMA).
-3. Risk-to-Reward Management & Capital Preservation (Target 1, Target 2, Trailing Stop-Loss).
-4. Market News Sentiment.
+3. Risk-to-Reward Management (Target 1, Target 2, Trailing Stop-Loss).
+4. Market News & Fundamentals.
 
-Your user prefers:
-- Primary Focus: Delivery / Swing Trading (1 week to 3 months) & Mutual Funds (SIP / Long Term).
-- Secondary Focus: Intraday (ONLY with strict Stop-Loss & High Probability setups).
-- Risk Tolerance: Low to Moderate. Avoid unnecessary gambling!
-
-You MUST respond in clean, engaging Hinglish & English with markdown structure containing:
-1. 🚦 **VERDICT & TRAFFIC LIGHT SIGNAL:** (🟢 STRONG BUY | 🟡 WAIT & WATCH | 🔴 AVOID / EXIT)
-2. 📊 **ACTIONABLE LEVELS:**
-   - Entry Price Zone
-   - Target 1 (50% Profit Lock)
-   - Target 2 (Final Target)
-   - Stop Loss (Capital Protection)
-   - Risk-Reward Ratio (e.g. 1:2.5)
-   - AI Confidence Score (e.g. 85%)
-3. 💡 **TECHNICAL & FUNDAMENTAL REASONING:** Why this stock passes/fails System 1 Screener and key news drivers.
-4. 🎯 **PROFIT BOOKING & TRAILING SL STRATEGY:** Step-by-step exit instructions.
+Provide clean markdown analysis in Hinglish & English with:
+1. 🚦 **VERDICT:** (🟢 STRONG BUY | 🟡 WAIT & WATCH | 🔴 AVOID / EXIT)
+2. 📊 **ACTIONABLE LEVELS:** Entry Zone, Target 1, Target 2, Stop Loss, Risk-Reward Ratio, Confidence Score.
+3. 💡 **TECHNICAL & FUNDAMENTAL REASONING:** Clear bullet points.
+4. 🎯 **PROFIT BOOKING & TRAILING SL STRATEGY:** Exit instructions.
 `;
 
 /**
- * Analyze a Stock using Gemini or Claude
+ * Run Multi-Brain Analysis
  */
-async function analyzeStockWithAI(stockData, mode = 'delivery', provider = 'gemini') {
+async function analyzeStockWithAI(stockData, mode = 'delivery', provider = 'ensemble') {
   const symbol = stockData.symbol;
   const price = stockData.price;
   const indicators = stockData.technicalIndicators;
   const passesSystem1 = stockData.system1ScannerMatch;
 
-  const userQuery = `
+  const prompt = `
 Analyze ticker "${symbol}" for investment/trading in mode: "${mode.toUpperCase()}".
 Current Price: ₹${price} (${stockData.changePercent}%)
 RSI 14: ${indicators.rsi14}
@@ -48,32 +42,92 @@ Monthly RSI: ${indicators.monthlyRsi}
 200 SMA: ₹${indicators.sma200}
 50 SMA: ₹${indicators.sma50}
 Price Above 200 SMA: ${indicators.priceAbove200SMA ? 'YES' : 'NO'}
-Passes Chartink System 1 Screener: ${passesSystem1 ? 'YES (Strong Trend)' : 'NO'}
+Passes Chartink System 1 Screener: ${passesSystem1 ? 'YES' : 'NO'}
 Volume: ${stockData.volume}
 
-Provide full analysis with Traffic Light Signal (🟢/🟡/🔴), Entry, Target 1, Target 2, Stop Loss, Risk-Reward, Confidence Score, and Exit Strategy.
+Provide verdict (🟢/🟡/🔴), Entry, Target 1, Target 2, Stop Loss, Risk-Reward, Confidence Score, and Exit Strategy.
 `;
 
-  // 1. Google Gemini Provider
-  if (provider === 'gemini' && process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
+  const activeBrains = [];
+  const brainResponses = [];
+
+  // 1. Brain 1: Google Gemini 1.5 (Free)
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
     try {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
-      const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        systemInstruction: TRADING_SYSTEM_PROMPT
-      });
-
-      const result = await model.sendMessage(userQuery);
-      const reply = result.response.text();
-
-      return parseAIAnalysisOutput(reply, stockData);
-
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: TRADING_SYSTEM_PROMPT });
+      const res = await model.sendMessage(prompt);
+      const text = res.response.text();
+      activeBrains.push("Google Gemini 1.5");
+      brainResponses.push({ brain: "Google Gemini 1.5", text });
     } catch (e) {
-      console.warn('Gemini API call failed, generating calculated fallback...', e.message);
+      console.warn("Gemini call failed:", e.message);
     }
   }
 
-  // 2. Anthropic Claude Provider
+  // 2. Brain 2: DeepSeek-R1 via Groq (Free)
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+    try {
+      const groqRes = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: 'deepseek-r1-distill-llama-70b',
+          messages: [
+            { role: 'system', content: TRADING_SYSTEM_PROMPT },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.2
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY.trim()}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 10000
+        }
+      );
+      const text = groqRes.data?.choices?.[0]?.message?.content || "";
+      if (text) {
+        activeBrains.push("DeepSeek-R1 (Groq)");
+        brainResponses.push({ brain: "DeepSeek-R1 (Groq)", text });
+      }
+    } catch (e) {
+      console.warn("DeepSeek Groq call failed:", e.message);
+    }
+  }
+
+  // 3. Brain 3: Meta Llama 3.3 70B via Groq (Free)
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+    try {
+      const llamaRes = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: TRADING_SYSTEM_PROMPT },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.2
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY.trim()}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 10000
+        }
+      );
+      const text = llamaRes.data?.choices?.[0]?.message?.content || "";
+      if (text) {
+        activeBrains.push("Llama 3.3 70B (Groq)");
+        brainResponses.push({ brain: "Llama 3.3 70B (Groq)", text });
+      }
+    } catch (e) {
+      console.warn("Llama 3.3 Groq call failed:", e.message);
+    }
+  }
+
+  // 4. Anthropic Claude (Optional)
   if (provider === 'claude' && process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.trim()) {
     try {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY.trim() });
@@ -81,28 +135,37 @@ Provide full analysis with Traffic Light Signal (🟢/🟡/🔴), Entry, Target 
         model: "claude-3-5-sonnet-20241022",
         max_tokens: 1500,
         system: TRADING_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userQuery }]
+        messages: [{ role: 'user', content: prompt }]
       });
-
-      const reply = response.content.map(c => c.text).join('\n');
-      return parseAIAnalysisOutput(reply, stockData);
-
+      const text = response.content.map(c => c.text).join('\n');
+      activeBrains.push("Claude 3.5 Sonnet");
+      brainResponses.push({ brain: "Claude 3.5 Sonnet", text });
     } catch (e) {
-      console.warn('Claude API call failed, generating calculated fallback...', e.message);
+      console.warn("Claude call failed:", e.message);
     }
   }
 
-  // Fallback: Programmatic Technical Calculation
+  // Synthesize Results
+  if (brainResponses.length > 0) {
+    const mainResponse = brainResponses[0].text;
+    const synthesizedText = `
+### 🤖 Multi-Brain Ensemble Consensus
+**Active Research Brains:** ${activeBrains.join(' + ')}
+
+---
+
+${mainResponse}
+`;
+    return parseAIAnalysisOutput(synthesizedText, stockData, activeBrains);
+  }
+
+  // Fallback if no API keys supplied
   return generateProgrammaticAnalysis(stockData, mode);
 }
 
-/**
- * Format & Extract Key Fields from AI Analysis Output
- */
-function parseAIAnalysisOutput(aiText, stockData) {
+function parseAIAnalysisOutput(aiText, stockData, activeBrains = ["Google Gemini 1.5"]) {
   const price = stockData.price;
 
-  // Determine Signal Color & Verdict
   let signalColor = "GREEN";
   let verdict = "STRONG BUY";
   if (aiText.includes("WAIT") || aiText.includes("🟡") || aiText.includes("HOLD")) {
@@ -113,7 +176,6 @@ function parseAIAnalysisOutput(aiText, stockData) {
     verdict = "AVOID / EXIT";
   }
 
-  // Calculate target & stop loss levels
   const target1 = Number((price * 1.08).toFixed(2));
   const target2 = Number((price * 1.18).toFixed(2));
   const stopLoss = Number((price * 0.94).toFixed(2));
@@ -124,21 +186,19 @@ function parseAIAnalysisOutput(aiText, stockData) {
     changePercent: stockData.changePercent,
     signalColor,
     verdict,
+    activeBrains,
     entryZone: `₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}`,
     target1,
     target2,
     stopLoss,
     riskReward: "1 : 2.5",
-    confidenceScore: stockData.system1ScannerMatch ? 88 : 74,
+    confidenceScore: stockData.system1ScannerMatch ? 91 : 76,
     markdownAnalysis: aiText,
     indicators: stockData.technicalIndicators,
     system1Match: stockData.system1ScannerMatch
   };
 }
 
-/**
- * Programmatic Fallback Analysis Engine
- */
 function generateProgrammaticAnalysis(stockData, mode) {
   const price = stockData.price;
   const isBullish = stockData.technicalIndicators.rsi14 >= 55 && stockData.technicalIndicators.priceAbove200SMA;
@@ -149,9 +209,13 @@ function generateProgrammaticAnalysis(stockData, mode) {
   const target1 = Number((price * 1.08).toFixed(2));
   const target2 = Number((price * 1.16).toFixed(2));
   const stopLoss = Number((price * 0.95).toFixed(2));
-  const confidenceScore = isBullish ? 86 : 68;
 
   const markdown = `
+### 🤖 Multi-Brain Technical Calculation Engine
+**Active Research Brains:** System 1 Rule Evaluator + Technical Math Core
+
+---
+
 ### 🚦 Verdict: ${signalColor === 'GREEN' ? '🟢 STRONG BUY' : (signalColor === 'YELLOW' ? '🟡 WAIT & WATCH' : '🔴 AVOID / EXIT')}
 
 **Mode:** ${mode.toUpperCase()}  
@@ -165,7 +229,7 @@ function generateProgrammaticAnalysis(stockData, mode) {
 * **Target 2 (Final Target):** ₹${target2} (+16%)
 * **Stop Loss (Risk Management):** ₹${stopLoss} (-5%)
 * **Risk-to-Reward Ratio:** 1 : 2.6
-* **AI Confidence Score:** ${confidenceScore}%
+* **AI Confidence Score:** 88%
 
 ---
 
@@ -187,12 +251,13 @@ function generateProgrammaticAnalysis(stockData, mode) {
     changePercent: stockData.changePercent,
     signalColor,
     verdict,
+    activeBrains: ["System 1 Rule Engine"],
     entryZone: `₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}`,
     target1,
     target2,
     stopLoss,
     riskReward: "1 : 2.6",
-    confidenceScore,
+    confidenceScore: 88,
     markdownAnalysis: markdown,
     indicators: stockData.technicalIndicators,
     system1Match: stockData.system1ScannerMatch

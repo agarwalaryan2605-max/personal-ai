@@ -47,11 +47,13 @@
       </div>
 
       <div class="header-right">
+
         <!-- AI Model Switcher -->
         <div class="selector-box">
           <i class="fa-solid fa-brain"></i>
           <select id="aiModelSelect" class="clean-select">
-            <option value="gemini">Google Gemini 1.5</option>
+            <option value="ensemble">🤖 Multi-Brain Ensemble (Gemini + DeepSeek + Llama)</option>
+            <option value="gemini">Google Gemini 1.5 (Free)</option>
             <option value="claude">Anthropic Claude 3.5</option>
           </select>
         </div>
@@ -274,12 +276,18 @@
         <button class="modal-close-btn" id="closeSettingsModal"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
-        <p class="desc">Save your Gemini & Claude API keys locally or configure them on Render.com environment variables.</p>
+        <p class="desc">Save your FREE Gemini & Grok API keys locally or configure them on Render.com environment variables.</p>
         
         <div class="form-group">
-          <label>Google Gemini API Key:</label>
+          <label>Google Gemini API Key (Free):</label>
           <input type="password" id="geminiKeyInput" placeholder="AIzaSy...">
-          <a href="https://aistudio.google.com/" target="_blank" class="link">Get Free Key &rarr;</a>
+          <a href="https://aistudio.google.com/" target="_blank" class="link">Get Free Gemini Key &rarr;</a>
+        </div>
+
+        <div class="form-group">
+          <label>Groq API Key (Free DeepSeek-R1 & Llama 3.3):</label>
+          <input type="password" id="groqKeyInput" placeholder="gsk_...">
+          <a href="https://console.groq.com/keys" target="_blank" class="link">Get Free Groq Key &rarr;</a>
         </div>
 
         <div class="form-group">

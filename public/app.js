@@ -302,6 +302,7 @@ function setupEventListeners() {
 
   saveSettingsBtn.addEventListener('click', async () => {
     const geminiKey = geminiKeyInput.value.trim();
+    const groqKey = document.getElementById('groqKeyInput')?.value.trim() || '';
     const claudeKey = claudeKeyInput.value.trim();
 
     try {
@@ -311,7 +312,7 @@ function setupEventListeners() {
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ geminiKey, claudeKey })
+        body: JSON.stringify({ geminiKey, groqKey, claudeKey })
       });
       const data = await res.json();
 
