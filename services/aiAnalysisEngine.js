@@ -316,16 +316,6 @@ function generateProgrammaticAnalysis(stockData, mode) {
     indicators: stockData.technicalIndicators,
     system1Match: stockData.system1ScannerMatch
   };
-    entryZone: `₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}`,
-    target1,
-    target2,
-    stopLoss,
-    riskReward: "1 : 2.6",
-    confidenceScore: 88,
-    markdownAnalysis: markdown,
-    indicators: stockData.technicalIndicators,
-    system1Match: stockData.system1ScannerMatch
-  };
 }
 
 module.exports = {
