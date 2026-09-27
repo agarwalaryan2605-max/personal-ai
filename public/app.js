@@ -609,16 +609,18 @@ function setupEventListeners() {
   closeSettingsModal.addEventListener('click', closeModal);
   cancelSettingsBtn.addEventListener('click', closeModal);
 
-  // Floating Copilot AI Assistant Modal Handlers
+  // Floating & Header Copilot AI Assistant Modal Handlers
   const openCopilotBtn = document.getElementById('openCopilotBtn');
+  const headerCopilotBtn = document.getElementById('headerCopilotBtn');
   const closeCopilotBtn = document.getElementById('closeCopilotBtn');
   const copilotModal = document.getElementById('copilotModal');
   const copilotForm = document.getElementById('copilotForm');
   const copilotInput = document.getElementById('copilotInput');
   const copilotMessages = document.getElementById('copilotMessages');
 
-  if (openCopilotBtn && copilotModal) {
-    openCopilotBtn.addEventListener('click', () => copilotModal.classList.add('active'));
+  if (copilotModal) {
+    openCopilotBtn?.addEventListener('click', () => copilotModal.classList.add('active'));
+    headerCopilotBtn?.addEventListener('click', () => copilotModal.classList.add('active'));
     closeCopilotBtn?.addEventListener('click', () => copilotModal.classList.remove('active'));
   }
 

@@ -1143,6 +1143,27 @@ body.simple-mode .pro-feature {
   padding: 6px 12px;
 }
 
+/* Header Copilot Button */
+.copilot-header-btn {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 10px rgba(41, 98, 255, 0.4);
+}
+
+.copilot-header-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 15px rgba(156, 39, 176, 0.6);
+}
+
 /* Floating AI Assistant Copilot Button */
 .floating-copilot-btn {
   position: fixed;
@@ -1150,8 +1171,8 @@ body.simple-mode .pro-feature {
   right: 24px;
   background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
   color: #fff;
-  border: none;
-  padding: 12px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 20px;
   border-radius: 30px;
   font-weight: 700;
   font-size: 0.88rem;
@@ -1159,14 +1180,19 @@ body.simple-mode .pro-feature {
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 8px 24px rgba(41, 98, 255, 0.4);
-  z-index: 999;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 30px rgba(41, 98, 255, 0.6);
+  z-index: 999999;
+  animation: copilotGlow 2.5s infinite alternate;
+}
+
+@keyframes copilotGlow {
+  0% { box-shadow: 0 0 15px rgba(41, 98, 255, 0.6); }
+  100% { box-shadow: 0 0 30px rgba(156, 39, 176, 0.9); }
 }
 
 .floating-copilot-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(41, 98, 255, 0.6);
+  box-shadow: 0 12px 30px rgba(41, 98, 255, 0.8);
 }
 
 /* Copilot Drawer & Modal */
