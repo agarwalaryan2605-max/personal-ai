@@ -908,3 +908,88 @@ body.simple-mode .pro-feature {
 }
 .feedback-msg.success { display: block; background: rgba(0, 200, 5, 0.15); color: var(--signal-green); }
 .feedback-msg.error { display: block; background: rgba(255, 59, 48, 0.15); color: var(--signal-red); }
+
+/* Step-by-Step AI Research Trace Styles */
+.trace-action-bar {
+  margin-top: 8px;
+}
+
+.trace-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(41, 98, 255, 0.15), rgba(156, 39, 176, 0.15));
+  border: 1px solid var(--border-glow);
+  color: #fff;
+  transition: all 0.2s;
+}
+
+.trace-btn:hover {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.trace-steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trace-step-card {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.trace-step-card:hover {
+  border-color: var(--accent-blue);
+}
+
+.trace-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.trace-step-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--accent-blue);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.trace-step-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trace-step-body {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-blue);
+}
+
+.trace-step-body ul {
+  padding-left: 18px;
+  margin-top: 4px;
+}
+
+.trace-step-body li {
+  margin-bottom: 3px;
+}

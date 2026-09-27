@@ -213,6 +213,13 @@
           <!-- Dynamic Markdown Rendered Content -->
         </div>
 
+        <!-- Quick Action to View Step-by-Step AI Trace -->
+        <div class="trace-action-bar">
+          <button type="button" class="btn secondary trace-btn" id="openTraceTabBtn">
+            <i class="fa-solid fa-route"></i> 🔬 View Step-by-Step AI Research Trace & Audit
+          </button>
+        </div>
+
       </section>
     </main>
 
@@ -221,6 +228,9 @@
       <div class="tab-header-bar">
         <button class="tab-btn active" data-tab="topPicksTab">
           <i class="fa-solid fa-fire"></i> Mode B: Auto Top AI Picks (System 1)
+        </button>
+        <button class="tab-btn" data-tab="traceTab">
+          <i class="fa-solid fa-route"></i> Step-by-Step AI Research Trace
         </button>
         <button class="tab-btn" data-tab="chartinkTab">
           <i class="fa-solid fa-link"></i> Chartink URL Parser
@@ -240,6 +250,17 @@
           </div>
           <div class="picks-cards-grid" id="topPicksGrid">
             <!-- Dynamic Pick Cards -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Step-by-Step AI Research & Audit Trace -->
+        <div class="tab-pane" id="traceTab">
+          <div class="pane-intro">
+            <h3>🔬 Step-by-Step AI Research & Calculation Audit</h3>
+            <p>See exact step-by-step breakdown of how AI fetched data, calculated indicators, verified System 1 rules, and generated trade targets.</p>
+          </div>
+          <div class="trace-steps-container" id="traceTabContent">
+            <!-- Dynamic Step 1 to Step 5 Timeline Cards -->
           </div>
         </div>
 

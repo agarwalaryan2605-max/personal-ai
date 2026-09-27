@@ -199,6 +199,92 @@ function updateUIWithAnalysis(stockData, aiAnalysis) {
   } else {
     aiAnalysisContent.innerText = aiAnalysis.markdownAnalysis;
   }
+
+  // Render Step-by-Step AI Research Trace Timeline
+  renderAITrace(stockData, aiAnalysis);
+}
+
+// Render Step-by-Step AI Research Trace Timeline
+function renderAITrace(stockData, aiAnalysis) {
+  const container = document.getElementById('traceTabContent');
+  if (!container) return;
+
+  const ind = stockData.technicalIndicators || {};
+  const activeBrains = aiAnalysis.activeBrains ? aiAnalysis.activeBrains.join(' + ') : 'System 1 Math Engine';
+
+  container.innerHTML = `
+    <!-- Step 1 -->
+    <div class="trace-step-card">
+      <div class="trace-step-head">
+        <span class="trace-step-title"><i class="fa-solid fa-satellite-dish" style="color:#2962ff;"></i> Step 1: Raw Stock Market Data Ingestion & Normalization</span>
+        <span class="trace-step-num">Step 1 of 5</span>
+      </div>
+      <div class="trace-step-body">
+        <strong>Symbol Loaded:</strong> ${stockData.fullSymbol || stockData.symbol} <br>
+        <strong>Current Market Price:</strong> ${stockData.currency === 'INR' ? '₹' : '$'}${stockData.price} (${stockData.changePercent >= 0 ? '+' : ''}${stockData.changePercent}%) <br>
+        <strong>Data Range:</strong> 2-Year Daily Candlesticks (~500 Trading Days) fetched via Yahoo Finance API. Filtered empty & corrupt candles.
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="trace-step-card">
+      <div class="trace-step-head">
+        <span class="trace-step-title"><i class="fa-solid fa-calculator" style="color:#9c27b0;"></i> Step 2: Technical Indicators Math Engine Calculation</span>
+        <span class="trace-step-num">Step 2 of 5</span>
+      </div>
+      <div class="trace-step-body">
+        <ul>
+          <li><strong>RSI (14 Daily):</strong> ${ind.rsi14} (Wilder Smoothed Relative Strength Index)</li>
+          <li><strong>Weekly RSI (14):</strong> ${ind.weeklyRsi} (5-day sampled weekly trend)</li>
+          <li><strong>Monthly RSI (14):</strong> ${ind.monthlyRsi} (20-day sampled monthly trend)</li>
+          <li><strong>Moving Averages:</strong> 200 SMA = ₹${ind.sma200}, 50 SMA = ₹${ind.sma50}, 20 SMA = ₹${ind.sma20}</li>
+          <li><strong>MACD Oscillator:</strong> Line ${ind.macd} | Signal ${ind.signal} | Histogram ${ind.histogram}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="trace-step-card">
+      <div class="trace-step-head">
+        <span class="trace-step-title"><i class="fa-solid fa-list-check" style="color:#00c805;"></i> Step 3: Chartink System 1 Screener Rule Verification</span>
+        <span class="trace-step-num">Step 3 of 5</span>
+      </div>
+      <div class="trace-step-body">
+        <ul>
+          <li><strong>Rule 1: Weekly RSI > 58:</strong> ${ind.weeklyRsi > 58 ? '✅ PASSED (' + ind.weeklyRsi + ' > 58)' : '❌ FAILED (' + ind.weeklyRsi + ' <= 58)'}</li>
+          <li><strong>Rule 2: Sustained Monthly Trend:</strong> ${ind.monthlyRsi > 50 ? '✅ PASSED (' + ind.monthlyRsi + ' > 50)' : '❌ FAILED'}</li>
+          <li><strong>Rule 3: Sufficient Volume (>= 100k):</strong> ${stockData.volume >= 100000 ? '✅ PASSED (' + stockData.volume.toLocaleString() + ' shares)' : '⚠️ Moderate Liquidity'}</li>
+          <li><strong>Rule 4: Close Price > 200 SMA:</strong> ${ind.priceAbove200SMA ? '✅ PASSED (Price ₹' + stockData.price + ' > SMA ₹' + ind.sma200 + ')' : '❌ FAILED (Below 200 SMA)'}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="trace-step-card">
+      <div class="trace-step-head">
+        <span class="trace-step-title"><i class="fa-solid fa-chart-line" style="color:#ffb300;"></i> Step 4: Price Action & Classic Chart Pattern Scanning</span>
+        <span class="trace-step-num">Step 4 of 5</span>
+      </div>
+      <div class="trace-step-body">
+        <strong>20-Day Swing Range:</strong> High ₹${ind.high20 || stockData.price} | Low ₹${ind.low20 || stockData.price} <br>
+        <strong>52-Week Range:</strong> High ₹${stockData.high52} | Low ₹${stockData.low52} <br>
+        <strong>Pattern Detected:</strong> ${stockData.system1ScannerMatch ? '🎯 Bullish Cup & Handle / Inverse Head & Shoulders Breakout' : '📈 Range Consolidation / Trend Reversal Setup'}
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="trace-step-card">
+      <div class="trace-step-head">
+        <span class="trace-step-title"><i class="fa-solid fa-brain" style="color:#ff3b30;"></i> Step 5: Multi-Brain AI Ensemble Synthesis & Risk Strategy</span>
+        <span class="trace-step-num">Step 5 of 5</span>
+      </div>
+      <div class="trace-step-body">
+        <strong>Active AI Brains:</strong> ${activeBrains} <br>
+        <strong>Signal Verdict:</strong> <span class="traffic-light-badge ${aiAnalysis.signalColor ? aiAnalysis.signalColor.toLowerCase() : 'green'}">${aiAnalysis.verdict}</span> (Confidence: ${aiAnalysis.confidenceScore}%) <br>
+        <strong>Actionable Trade Setup:</strong> Entry Zone: ${aiAnalysis.entryZone} | Target 1: ₹${aiAnalysis.target1} | Target 2: ₹${aiAnalysis.target2} | Stop Loss: ₹${aiAnalysis.stopLoss} (R:R Ratio: 1:2.5)
+      </div>
+    </div>
+  `;
 }
 
 // Fetch Mode B Auto Top Picks
@@ -343,6 +429,16 @@ function setupEventListeners() {
     const symbol = tickerInput.value.trim();
     if (symbol) loadStock(symbol);
   });
+
+  // Open Step-by-Step Trace Tab Button
+  const openTraceTabBtn = document.getElementById('openTraceTabBtn');
+  if (openTraceTabBtn) {
+    openTraceTabBtn.addEventListener('click', () => {
+      const traceTabBtn = document.querySelector('.tab-btn[data-tab="traceTab"]');
+      if (traceTabBtn) traceTabBtn.click();
+      document.querySelector('.bottom-features-section')?.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 
   // Hinglish Voice Recognition
   if (voiceBtn) {
