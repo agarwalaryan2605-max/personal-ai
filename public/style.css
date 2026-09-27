@@ -215,6 +215,80 @@ body {
   color: var(--signal-red);
 }
 
+/* View Mode Toggle Switcher */
+.view-mode-toggle {
+  display: flex;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  padding: 3px;
+  border-radius: var(--radius-md);
+}
+
+.view-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.view-toggle-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(41, 98, 255, 0.3);
+}
+
+/* Simple Beginner Guide Banner */
+.simple-guide-banner {
+  background: linear-gradient(90deg, rgba(41, 98, 255, 0.12), rgba(156, 39, 176, 0.12));
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+}
+
+.guide-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.step-num {
+  width: 20px;
+  height: 20px;
+  background: var(--accent-blue);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.guide-arrow {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+/* Simple Mode Clean Hiding */
+body.simple-mode .pro-feature {
+  display: none !important;
+}
+
 .analyze-btn {
   background: linear-gradient(135deg, var(--accent-blue), #1565c0);
   color: #fff;

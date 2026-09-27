@@ -54,6 +54,7 @@ const settingsFeedback = document.getElementById('settingsFeedback');
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
+  initViewMode();
   initTradingViewChart('TATAMOTORS', 'D');
   loadStock('TATAMOTORS');
   fetchTopPicks();
@@ -63,6 +64,31 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabs();
   setupTimeframeButtons();
 });
+
+// View Mode Toggle Handler (Simple View vs Pro View)
+function initViewMode() {
+  const simpleBtn = document.getElementById('simpleViewBtn');
+  const proBtn = document.getElementById('proViewBtn');
+  const savedMode = localStorage.getItem('stock_ai_view_mode') || 'simple';
+
+  const setView = (mode) => {
+    if (mode === 'simple') {
+      document.body.classList.add('simple-mode');
+      simpleBtn?.classList.add('active');
+      proBtn?.classList.remove('active');
+    } else {
+      document.body.classList.remove('simple-mode');
+      proBtn?.classList.add('active');
+      simpleBtn?.classList.remove('active');
+    }
+    localStorage.setItem('stock_ai_view_mode', mode);
+  };
+
+  setView(savedMode);
+
+  simpleBtn?.addEventListener('click', () => setView('simple'));
+  proBtn?.addEventListener('click', () => setView('pro'));
+}
 
 // Initialize TradingView Widget
 function initTradingViewChart(symbolInput, timeframe) {

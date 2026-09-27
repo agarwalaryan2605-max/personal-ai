@@ -49,12 +49,22 @@
 
       <div class="header-right">
 
-        <!-- AI Model Switcher -->
-        <div class="selector-box">
+        <!-- Simple / Pro View Switcher -->
+        <div class="view-mode-toggle">
+          <button type="button" class="view-toggle-btn active" id="simpleViewBtn" title="Clean & Easy Beginner View">
+            <i class="fa-solid fa-bolt"></i> Simple View
+          </button>
+          <button type="button" class="view-toggle-btn" id="proViewBtn" title="Full Technical & Multi-Brain View">
+            <i class="fa-solid fa-sliders"></i> Pro View
+          </button>
+        </div>
+
+        <!-- AI Model Switcher (Pro Feature) -->
+        <div class="selector-box pro-feature">
           <i class="fa-solid fa-brain"></i>
           <select id="aiModelSelect" class="clean-select">
-            <option value="ensemble">🤖 Multi-Brain Ensemble (Gemini + DeepSeek + Llama)</option>
-            <option value="gemini">Google Gemini 1.5 (Free)</option>
+            <option value="ensemble">🤖 Multi-Brain Ensemble</option>
+            <option value="gemini">Google Gemini 1.5</option>
             <option value="claude">Anthropic Claude 3.5</option>
           </select>
         </div>
@@ -105,6 +115,24 @@
       </div>
     </div>
 
+    <!-- Beginner Simple Guide Banner -->
+    <div class="simple-guide-banner" id="simpleGuideBanner">
+      <div class="guide-step">
+        <span class="step-num">1</span>
+        <span>Search Stock</span>
+      </div>
+      <i class="fa-solid fa-chevron-right guide-arrow"></i>
+      <div class="guide-step">
+        <span class="step-num">2</span>
+        <span>See Traffic Light Signal (🟢 Buy / 🟡 Wait / 🔴 Exit)</span>
+      </div>
+      <i class="fa-solid fa-chevron-right guide-arrow"></i>
+      <div class="guide-step">
+        <span class="step-num">3</span>
+        <span>Follow Target & Stop Loss Price</span>
+      </div>
+    </div>
+
     <!-- Main Workspace Grid -->
     <main class="workspace-grid">
       
@@ -132,7 +160,7 @@
         <!-- Signal Header & Traffic Light Badge -->
         <div class="verdict-card" id="verdictCard">
           <div class="verdict-header">
-            <span class="verdict-label">AI Decision & Signal</span>
+            <span class="verdict-label">AI Signal Verdict</span>
             <div class="traffic-light-badge green" id="trafficBadge">
               <span class="light-dot"></span>
               <span id="verdictText">🟢 STRONG BUY</span>
@@ -172,8 +200,8 @@
           </div>
         </div>
 
-        <!-- Technical Indicators Quick Bar -->
-        <div class="indicators-bar">
+        <!-- Technical Indicators Quick Bar (Pro Feature) -->
+        <div class="indicators-bar pro-feature">
           <div class="ind-pill" id="pillRsi">RSI(14): <strong>64.2</strong></div>
           <div class="ind-pill" id="pillWeeklyRsi">Weekly RSI: <strong>66.8</strong></div>
           <div class="ind-pill" id="pill200Sma">200 SMA: <strong>Above ✅</strong></div>
