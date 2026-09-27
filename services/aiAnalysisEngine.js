@@ -83,7 +83,7 @@ Provide verdict (🟢/🟡/🔴), Entry, Target 1, Target 2, Stop Loss, Risk-Rew
             'Authorization': `Bearer ${process.env.GROQ_API_KEY.trim()}`,
             'Content-Type': 'application/json'
           },
-          timeout: 10000
+          timeout: 20000
         }
       );
       const text = groqRes.data?.choices?.[0]?.message?.content || "";
@@ -114,7 +114,7 @@ Provide verdict (🟢/🟡/🔴), Entry, Target 1, Target 2, Stop Loss, Risk-Rew
             'Authorization': `Bearer ${process.env.GROQ_API_KEY.trim()}`,
             'Content-Type': 'application/json'
           },
-          timeout: 10000
+          timeout: 20000
         }
       );
       const text = llamaRes.data?.choices?.[0]?.message?.content || "";
@@ -171,14 +171,33 @@ function parseAIAnalysisOutput(aiText, stockData, activeBrains = ["Google Gemini
   if (aiText.includes("WAIT") || aiText.includes("🟡") || aiText.includes("HOLD")) {
     signalColor = "YELLOW";
     verdict = "WAIT / WATCH";
-  } else if (aiText.includes("AVOID") || aiText.includes("🔴") || aiText.includes("SELL")) {
+  } else if (aiText.includes("AVOID") || aiText.includes("🔴") || aiText.includes("SELL") || aiText.includes("EXIT")) {
     signalColor = "RED";
     verdict = "AVOID / EXIT";
   }
 
-  const target1 = Number((price * 1.08).toFixed(2));
-  const target2 = Number((price * 1.18).toFixed(2));
-  const stopLoss = Number((price * 0.94).toFixed(2));
+  // Extract custom target numbers from AI markdown using regex if present
+  let target1 = Number((price * 1.08).toFixed(2));
+  let target2 = Number((price * 1.18).toFixed(2));
+  let stopLoss = Number((price * 0.94).toFixed(2));
+
+  const t1Match = aiText.match(/Target 1.*?[₹$]\s*([\d,]+(?:\.\d+)?)/i);
+  if (t1Match && t1Match[1]) {
+    const parsed = parseFloat(t1Match[1].replace(/,/g, ''));
+    if (!isNaN(parsed) && parsed > 0) target1 = parsed;
+  }
+
+  const t2Match = aiText.match(/Target 2.*?[₹$]\s*([\d,]+(?:\.\d+)?)/i);
+  if (t2Match && t2Match[1]) {
+    const parsed = parseFloat(t2Match[1].replace(/,/g, ''));
+    if (!isNaN(parsed) && parsed > 0) target2 = parsed;
+  }
+
+  const slMatch = aiText.match(/Stop\s*Loss.*?[₹$]\s*([\d,]+(?:\.\d+)?)/i);
+  if (slMatch && slMatch[1]) {
+    const parsed = parseFloat(slMatch[1].replace(/,/g, ''));
+    if (!isNaN(parsed) && parsed > 0) stopLoss = parsed;
+  }
 
   return {
     symbol: stockData.symbol,

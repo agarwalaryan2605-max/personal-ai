@@ -102,12 +102,12 @@ async function getStockQuoteAndIndicators(symbolInput) {
   const displayName = getDisplayName(symbol);
 
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=2y&interval=1d`;
     const response = await axios.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       },
-      timeout: 8000
+      timeout: 9000
     });
 
     const result = response.data?.chart?.result?.[0];
@@ -118,24 +118,32 @@ async function getStockQuoteAndIndicators(symbolInput) {
     const meta = result.meta;
     const quote = result.indicators.quote[0];
 
-    const closes = quote.close.filter(c => c !== null);
-    const volumes = quote.volume.filter(v => v !== null);
-    const highs = quote.high.filter(h => h !== null);
-    const lows = quote.low.filter(l => l !== null);
+    const closes = (quote.close || []).filter(c => c !== null && c !== undefined && !isNaN(c));
+    const volumes = (quote.volume || []).filter(v => v !== null && v !== undefined && !isNaN(v));
+    const highs = (quote.high || []).filter(h => h !== null && h !== undefined && !isNaN(h));
+    const lows = (quote.low || []).filter(l => l !== null && l !== undefined && !isNaN(l));
+
+    if (closes.length === 0) {
+      throw new Error(`No price history available for ${symbolInput}`);
+    }
 
     const currentPrice = meta.regularMarketPrice || closes[closes.length - 1];
-    const previousClose = meta.chartPreviousClose || closes[closes.length - 2];
+    const previousClose = meta.chartPreviousClose || (closes.length > 1 ? closes[closes.length - 2] : currentPrice);
     const change = currentPrice - previousClose;
-    const changePercent = (change / previousClose) * 100;
-    const currentVolume = volumes[volumes.length - 1] || 0;
+    const changePercent = previousClose ? (change / previousClose) * 100 : 0;
+    const currentVolume = volumes.length > 0 ? volumes[volumes.length - 1] : 0;
 
     const rsi14 = calculateRSI(closes, 14);
+    
+    // Sample weekly (every 5 trading days) & monthly (every 20 trading days)
     const weeklyCloses = getSampledCloses(closes, 5);
     const weeklyRsi = calculateRSI(weeklyCloses, 14);
 
     const monthlyCloses = getSampledCloses(closes, 20);
-    const monthlyRsi = calculateRSI(monthlyCloses, 14);
-    const oneMonthAgoMonthlyRsi = calculateRSI(monthlyCloses.slice(0, -1), 14);
+    const monthlyRsi = calculateRSI(monthlyCloses, Math.min(14, Math.max(3, monthlyCloses.length - 1)));
+    const oneMonthAgoMonthlyRsi = monthlyCloses.length > 2 
+      ? calculateRSI(monthlyCloses.slice(0, -1), Math.min(14, Math.max(3, monthlyCloses.length - 2)))
+      : monthlyRsi;
 
     const sma200 = calculateSMA(closes, 200);
     const sma50 = calculateSMA(closes, 50);

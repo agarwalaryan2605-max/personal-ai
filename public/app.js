@@ -65,11 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Initialize TradingView Widget
-function initTradingViewChart(symbol, timeframe) {
-  let tvSymbol = `NSE:${symbol}`;
-  const usTickers = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AMD'];
-  if (usTickers.includes(symbol.toUpperCase())) {
-    tvSymbol = `NASDAQ:${symbol}`;
+function initTradingViewChart(symbolInput, timeframe) {
+  const clean = symbolInput.trim().toUpperCase().replace('.NS', '').replace('.BO', '');
+  let tvSymbol = `NSE:${clean}`;
+  
+  const usTickers = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AMD', 'NFLX', 'QCOM'];
+  if (usTickers.includes(clean)) {
+    tvSymbol = `NASDAQ:${clean}`;
+  } else if (clean.includes('NIFTY') || clean === 'NIFTY50') {
+    tvSymbol = `NSE:NIFTY`;
+  } else if (clean.includes('BANKNIFTY')) {
+    tvSymbol = `NSE:BANKNIFTY`;
+  } else if (clean.includes('SENSEX')) {
+    tvSymbol = `BSE:SENSEX`;
   }
 
   const container = document.getElementById('tradingview_chart_container');
@@ -438,14 +446,24 @@ function setupEventListeners() {
 // Render Portfolio Holdings Table
 function renderHoldingsTable() {
   holdingsTableBody.innerHTML = '';
-  holdings.forEach((item, index) => {
+  if (holdings.length === 0) {
+    holdingsTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#787b86; padding:16px;">No holdings added yet. Add a stock above to start tracking live exit alerts!</td></tr>';
+    return;
+  }
+
+  holdings.forEach((item) => {
     const tr = document.createElement('tr');
+    const t1 = item.target1 || Number((item.buyPrice * 1.08).toFixed(2));
+    const sl = item.stopLoss || Number((item.buyPrice * 0.95).toFixed(2));
+
     tr.innerHTML = `
       <td><strong>${item.symbol}</strong></td>
       <td>₹${item.buyPrice}</td>
       <td>${item.qty}</td>
+      <td><span style="color:#00c805; font-weight:600;">₹${t1}</span></td>
+      <td><span style="color:#ff3b30; font-weight:600;">₹${sl}</span></td>
       <td>
-        <button onclick="deleteHolding('${item.id}')" style="background:transparent; border:none; color:#ff3b30; cursor:pointer;">
+        <button onclick="deleteHolding('${item.id}')" style="background:transparent; border:none; color:#ff3b30; cursor:pointer;" title="Delete holding">
           <i class="fa-solid fa-trash"></i>
         </button>
       </td>
