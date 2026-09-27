@@ -3,6 +3,9 @@ const axios = require('axios');
 /**
  * Top Indian NSE/BSE & US Stocks Index for Fast Autocomplete
  */
+/**
+ * Top Indian NSE/BSE & US Stocks Index for Fast Autocomplete
+ */
 const POPULAR_STOCKS = [
   { symbol: 'TATAMOTORS', name: 'Tata Motors Limited', exchange: 'NSE' },
   { symbol: 'RELIANCE', name: 'Reliance Industries Ltd', exchange: 'NSE' },
@@ -15,15 +18,24 @@ const POPULAR_STOCKS = [
   { symbol: 'ITC', name: 'ITC Limited', exchange: 'NSE' },
   { symbol: 'LT', name: 'Larsen & Toubro Ltd', exchange: 'NSE' },
   { symbol: 'BAJFINANCE', name: 'Bajaj Finance Limited', exchange: 'NSE' },
+  { symbol: 'KOTAKBANK', name: 'Kotak Mahindra Bank Ltd', exchange: 'NSE' },
+  { symbol: 'AXISBANK', name: 'Axis Bank Limited', exchange: 'NSE' },
+  { symbol: 'MARUTI', name: 'Maruti Suzuki India Ltd', exchange: 'NSE' },
+  { symbol: 'SUNPHARMA', name: 'Sun Pharmaceutical Industries', exchange: 'NSE' },
+  { symbol: 'HAL', name: 'Hindustan Aeronautics Ltd', exchange: 'NSE' },
+  { symbol: 'BEL', name: 'Bharat Electronics Limited', exchange: 'NSE' },
   { symbol: 'ZOMATO', name: 'Zomato Limited', exchange: 'NSE' },
   { symbol: 'SUZLON', name: 'Suzlon Energy Limited', exchange: 'NSE' },
   { symbol: 'BHEL', name: 'Bharat Heavy Electricals Ltd', exchange: 'NSE' },
+  { symbol: 'NIFTY50', name: 'Nifty 50 Index', exchange: 'NSE_INDEX' },
+  { symbol: 'BANKNIFTY', name: 'Nifty Bank Index', exchange: 'NSE_INDEX' },
   { symbol: 'NIFTYBEES', name: 'Nippon India ETF Nifty BeES', exchange: 'NSE' },
   { symbol: 'PARAG PARIKH FLEXI CAP', name: 'Parag Parikh Flexi Cap Fund', exchange: 'MUTUAL_FUND' },
   { symbol: 'NVDA', name: 'NVIDIA Corporation', exchange: 'NASDAQ' },
   { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NASDAQ' },
   { symbol: 'TSLA', name: 'Tesla Inc.', exchange: 'NASDAQ' },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.', exchange: 'NASDAQ' }
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', exchange: 'NASDAQ' },
+  { symbol: 'MSFT', name: 'Microsoft Corporation', exchange: 'NASDAQ' }
 ];
 
 /**
@@ -50,7 +62,7 @@ async function searchStocks(query) {
 
     const yahooQuotes = res.data?.quotes || [];
     const remoteMatches = yahooQuotes
-      .filter(item => item.symbol && (item.quoteType === 'EQUITY' || item.quoteType === 'MUTUALFUND' || item.quoteType === 'ETF'))
+      .filter(item => item.symbol && (item.quoteType === 'EQUITY' || item.quoteType === 'MUTUALFUND' || item.quoteType === 'ETF' || item.quoteType === 'INDEX'))
       .map(item => ({
         symbol: item.symbol.replace('.NS', '').replace('.BO', ''),
         fullSymbol: item.symbol,
@@ -85,8 +97,13 @@ function getDisplayName(symbol) {
 // Format symbol for Yahoo Finance API
 function formatSymbol(symbol) {
   let s = symbol.trim().toUpperCase();
+
+  if (s === 'NIFTY' || s === 'NIFTY 50' || s === 'NIFTY50') return '^NSEI';
+  if (s === 'BANKNIFTY' || s === 'NIFTYBANK' || s === 'NIFTY BANK') return '^NSEBANK';
+  if (s === 'SENSEX' || s === 'BSE SENSEX') return '^BSESN';
+
   if (!s.includes('.') && !s.startsWith('^')) {
-    const usTickers = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AMD', 'NFLX'];
+    const usTickers = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AMD', 'NFLX', 'QCOM'];
     if (!usTickers.includes(s)) {
       s = `${s}.NS`;
     }

@@ -41,16 +41,20 @@ app.get('/api/status', (req, res) => {
 app.post('/api/settings', (req, res) => {
   try {
     const { geminiKey, groqKey, claudeKey } = req.body;
-    const envPath = path.join(__dirname, '.env');
     
     if (geminiKey !== undefined) process.env.GEMINI_API_KEY = geminiKey.trim();
     if (groqKey !== undefined) process.env.GROQ_API_KEY = groqKey.trim();
     if (claudeKey !== undefined) process.env.ANTHROPIC_API_KEY = claudeKey.trim();
 
-    const envContent = `PORT=${PORT}\nGEMINI_API_KEY=${process.env.GEMINI_API_KEY || ''}\nGROQ_API_KEY=${process.env.GROQ_API_KEY || ''}\nANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY || ''}\n`;
-    fs.writeFileSync(envPath, envContent, 'utf8');
+    try {
+      const envPath = path.join(__dirname, '.env');
+      const envContent = `PORT=${PORT}\nGEMINI_API_KEY=${process.env.GEMINI_API_KEY || ''}\nGROQ_API_KEY=${process.env.GROQ_API_KEY || ''}\nANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY || ''}\n`;
+      fs.writeFileSync(envPath, envContent, 'utf8');
+    } catch (fsErr) {
+      console.warn('Fs write warning (Read-only container):', fsErr.message);
+    }
 
-    res.json({ success: true, message: 'API Keys saved successfully!' });
+    res.json({ success: true, message: 'API Keys updated in memory successfully!' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to save settings: ' + error.message });
   }
@@ -124,7 +128,7 @@ app.post('/api/stock/parse-chartink', async (req, res) => {
   }
 });
 
-// 8. Portfolio Exit & Trailing SL Alerts Evaluator
+// 8. Portfolio Exit & Trailing SL Alerts Evaluator (Concurrent Promise.all)
 app.post('/api/portfolio/alerts', async (req, res) => {
   try {
     const { holdings = [] } = req.body;
@@ -132,14 +136,18 @@ app.post('/api/portfolio/alerts', async (req, res) => {
       return res.json({ alerts: [] });
     }
 
-    // Fetch live quotes for holdings
+    // Fetch live quotes for holdings concurrently in parallel
     const liveQuotes = {};
-    for (const item of holdings) {
-      if (item.symbol) {
+    const validHoldings = holdings.filter(item => item && item.symbol);
+    
+    await Promise.all(validHoldings.map(async (item) => {
+      try {
         const quote = await getStockQuoteAndIndicators(item.symbol);
         liveQuotes[item.symbol.toUpperCase()] = quote;
+      } catch (e) {
+        console.warn(`Quote fetch failed for holding ${item.symbol}:`, e.message);
       }
-    }
+    }));
 
     const alerts = evaluatePortfolioAlerts(holdings, liveQuotes);
     res.json({ success: true, alerts });
