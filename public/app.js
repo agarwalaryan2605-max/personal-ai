@@ -55,6 +55,7 @@ const settingsFeedback = document.getElementById('settingsFeedback');
 // Init
 document.addEventListener('DOMContentLoaded', () => {
   initViewMode();
+  setupMainNavbar();
   initTradingViewChart('TATAMOTORS', 'D');
   loadStock('TATAMOTORS');
   fetchTopPicks();
@@ -64,6 +65,41 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabs();
   setupTimeframeButtons();
 });
+
+// Global Switch To Section Helper
+window.switchToSection = function(sectionId) {
+  const navBtns = document.querySelectorAll('.nav-tab-btn');
+  const modules = document.querySelectorAll('.dashboard-module');
+
+  navBtns.forEach(btn => {
+    if (btn.dataset.section === sectionId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  modules.forEach(mod => {
+    if (mod.id === sectionId) {
+      mod.classList.add('active');
+    } else {
+      mod.classList.remove('active');
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Main Navbar Handler
+function setupMainNavbar() {
+  const navBtns = document.querySelectorAll('.nav-tab-btn');
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetSection = btn.dataset.section;
+      if (targetSection) switchToSection(targetSection);
+    });
+  });
+}
 
 // View Mode Toggle Handler (Simple View vs Pro View)
 function initViewMode() {
@@ -209,6 +245,7 @@ window.loadStock = function(symbol) {
 
   initTradingViewChart(activeSymbol, activeTimeframe);
   runAIAnalysis(activeSymbol);
+  switchToSection('analysisSection');
 };
 
 // Run AI Deep Analysis (Mode A)

@@ -138,29 +138,34 @@
       </div>
     </div>
 
-    <!-- Main Workspace Grid -->
-    <main class="workspace-grid">
+    <!-- Main Top Navigation Bar (Separated Sorted Dashboard Sections) -->
+    <nav class="main-app-navbar" id="mainNavbar">
+      <button class="nav-tab-btn active" data-section="analysisSection">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> 1. Stock AI Signal
+      </button>
+
+      <button class="nav-tab-btn" data-section="chartSection">
+        <i class="fa-solid fa-chart-candlestick"></i> 2. Live Chart & Patterns
+      </button>
+
+      <button class="nav-tab-btn" data-section="topPicksSection">
+        <i class="fa-solid fa-fire"></i> 3. Auto Top AI Picks
+      </button>
+
+      <button class="nav-tab-btn" data-section="portfolioSection">
+        <i class="fa-solid fa-wallet"></i> 4. My Portfolio & Alerts
+      </button>
+
+      <button class="nav-tab-btn" data-section="traceSection">
+        <i class="fa-solid fa-microscope"></i> 5. Research Audit & Parser
+      </button>
+    </nav>
+
+    <!-- Main Dashboard Modules Container -->
+    <main class="dashboard-container">
       
-      <!-- Left Column: TradingView Live Interactive Chart -->
-      <section class="chart-section">
-        <div class="section-bar">
-          <div class="chart-title">
-            <i class="fa-solid fa-chart-candlestick"></i>
-            <span id="activeStockTitle">TATAMOTORS (NSE) - TradingView Live</span>
-          </div>
-          <div class="timeframe-buttons">
-            <button class="tf-btn active" data-tf="D">1D</button>
-            <button class="tf-btn" data-tf="W">1W</button>
-            <button class="tf-btn" data-tf="M">1M</button>
-          </div>
-        </div>
-
-        <!-- TradingView Widget Container -->
-        <div id="tradingview_chart_container" class="chart-container"></div>
-      </section>
-
-      <!-- Right Column: AI Signal & Traffic Light Verdict Panel -->
-      <section class="ai-signal-section">
+      <!-- Section 1: Stock AI Signal & Key Trade Levels -->
+      <section class="dashboard-module active" id="analysisSection">
         
         <!-- Signal Header & Traffic Light Badge -->
         <div class="verdict-card" id="verdictCard">
@@ -222,37 +227,40 @@
           <!-- Dynamic Markdown Rendered Content -->
         </div>
 
-        <!-- Quick Action to View Step-by-Step AI Trace -->
-        <div class="trace-action-bar">
-          <button type="button" class="btn secondary trace-btn" id="openTraceTabBtn">
-            <i class="fa-solid fa-route"></i> 🔬 View Step-by-Step AI Research Trace & Audit
+        <div class="quick-nav-actions">
+          <button type="button" class="btn primary" onclick="switchToSection('chartSection')">
+            <i class="fa-solid fa-chart-candlestick"></i> View Live Candlestick Chart
+          </button>
+          <button type="button" class="btn secondary" onclick="switchToSection('traceSection')">
+            <i class="fa-solid fa-route"></i> View Step-by-Step Research Audit
           </button>
         </div>
 
       </section>
-    </main>
 
-    <!-- Bottom Feature Tabs Section -->
-    <section class="bottom-features-section">
-      <div class="tab-header-bar">
-        <button class="tab-btn active" data-tab="topPicksTab">
-          <i class="fa-solid fa-fire"></i> Mode B: Auto Top AI Picks (System 1)
-        </button>
-        <button class="tab-btn" data-tab="traceTab">
-          <i class="fa-solid fa-route"></i> Step-by-Step AI Research Trace
-        </button>
-        <button class="tab-btn" data-tab="chartinkTab">
-          <i class="fa-solid fa-link"></i> Chartink URL Parser
-        </button>
-        <button class="tab-btn" data-tab="portfolioTab">
-          <i class="fa-solid fa-wallet"></i> My Portfolio & Exit Alerts
-        </button>
-      </div>
+      <!-- Section 2: Interactive TradingView Live Candlestick Chart -->
+      <section class="dashboard-module" id="chartSection">
+        <div class="chart-section">
+          <div class="section-bar">
+            <div class="chart-title">
+              <i class="fa-solid fa-chart-candlestick"></i>
+              <span id="activeStockTitle">TATAMOTORS (NSE) - TradingView Live</span>
+            </div>
+            <div class="timeframe-buttons">
+              <button class="tf-btn active" data-tf="D">1D</button>
+              <button class="tf-btn" data-tf="W">1W</button>
+              <button class="tf-btn" data-tf="M">1M</button>
+            </div>
+          </div>
 
-      <div class="tab-body">
-        
-        <!-- Tab 1: Auto AI Top Picks (Mode B) -->
-        <div class="tab-pane active" id="topPicksTab">
+          <!-- TradingView Widget Container -->
+          <div id="tradingview_chart_container" class="chart-container"></div>
+        </div>
+      </section>
+
+      <!-- Section 3: Auto Top AI Picks (Mode B & System 1) -->
+      <section class="dashboard-module" id="topPicksSection">
+        <div class="module-card">
           <div class="pane-intro">
             <h3>🤖 Auto Market Discovery - Daily System 1 Screener Picks</h3>
             <p>Calculated using <strong>Weekly RSI > 60, Monthly RSI > 60, Volume >= 100k, and 200 SMA</strong> filters.</p>
@@ -261,38 +269,11 @@
             <!-- Dynamic Pick Cards -->
           </div>
         </div>
+      </section>
 
-        <!-- Tab 2: Step-by-Step AI Research & Audit Trace -->
-        <div class="tab-pane" id="traceTab">
-          <div class="pane-intro">
-            <h3>🔬 Step-by-Step AI Research & Calculation Audit</h3>
-            <p>See exact step-by-step breakdown of how AI fetched data, calculated indicators, verified System 1 rules, and generated trade targets.</p>
-          </div>
-          <div class="trace-steps-container" id="traceTabContent">
-            <!-- Dynamic Step 1 to Step 5 Timeline Cards -->
-          </div>
-        </div>
-
-        <!-- Tab 2: Custom Chartink URL Parser -->
-        <div class="tab-pane" id="chartinkTab">
-          <div class="pane-intro">
-            <h3>🔍 Dynamic Chartink Screener Parser</h3>
-            <p>Paste any Chartink URL to import its custom formula & scanning conditions directly into your AI.</p>
-          </div>
-          <form class="url-parser-form" id="chartinkForm">
-            <input 
-              type="text" 
-              id="chartinkUrlInput" 
-              placeholder="Paste Chartink Screener Link (e.g. https://chartink.com/screener/copy-copy-copy-system-1-scanner-2)..." 
-              value="https://chartink.com/screener/copy-copy-copy-system-1-scanner-2"
-            >
-            <button type="submit" class="btn primary"><i class="fa-solid fa-download"></i> Import Rules</button>
-          </form>
-          <div id="chartinkOutput" class="chartink-result-box"></div>
-        </div>
-
-        <!-- Tab 3: My Portfolio & Exit Alerts -->
-        <div class="tab-pane" id="portfolioTab">
+      <!-- Section 4: My Portfolio & Exit Strategy Alerts -->
+      <section class="dashboard-module" id="portfolioSection">
+        <div class="module-card">
           <div class="pane-intro">
             <h3>💼 My Portfolio & Trailing Stop-Loss Alerts</h3>
             <p>Add your stock/mutual fund holdings. AI will alert you when Target 1/Target 2 or Exit levels are hit!</p>
@@ -323,9 +304,39 @@
             </table>
           </div>
         </div>
+      </section>
 
-      </div>
-    </section>
+      <!-- Section 5: Step-by-Step AI Research Audit & Chartink Parser -->
+      <section class="dashboard-module" id="traceSection">
+        <div class="module-card">
+          <div class="pane-intro">
+            <h3>🔬 Step-by-Step AI Research & Calculation Audit</h3>
+            <p>See exact step-by-step breakdown of how AI fetched data, calculated indicators, verified System 1 rules, and generated trade targets.</p>
+          </div>
+          <div class="trace-steps-container" id="traceTabContent">
+            <!-- Dynamic Step 1 to Step 5 Timeline Cards -->
+          </div>
+        </div>
+
+        <div class="module-card" style="margin-top: 16px;">
+          <div class="pane-intro">
+            <h3>🔍 Dynamic Chartink Screener Parser</h3>
+            <p>Paste any Chartink URL to import its custom formula & scanning conditions directly into your AI.</p>
+          </div>
+          <form class="url-parser-form" id="chartinkForm">
+            <input 
+              type="text" 
+              id="chartinkUrlInput" 
+              placeholder="Paste Chartink Screener Link (e.g. https://chartink.com/screener/copy-copy-copy-system-1-scanner-2)..." 
+              value="https://chartink.com/screener/copy-copy-copy-system-1-scanner-2"
+            >
+            <button type="submit" class="btn primary"><i class="fa-solid fa-download"></i> Import Rules</button>
+          </form>
+          <div id="chartinkOutput" class="chartink-result-box"></div>
+        </div>
+      </section>
+
+    </main>
 
   </div>
 
