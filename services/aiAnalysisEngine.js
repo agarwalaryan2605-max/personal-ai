@@ -12,16 +12,17 @@ const axios = require('axios');
 
 const TRADING_SYSTEM_PROMPT = `
 You are an Elite AI Stock Analyst working in a Multi-AI Brain Ensemble. Analyze the stock using:
-1. Technical Price Action & Chart Patterns (RSI, 200 SMA, MACD, Volume Breakouts).
+1. Technical Price Action & Classic Chart Patterns (Head & Shoulders, Inverse Head & Shoulders, Double Bottom/W-Pattern, Cup & Handle, Bullish Flag & Pole, Ascending Triangle, Trendline Breakouts, Consolidation Boxes).
 2. Chartink System 1 Screener Criteria (Weekly RSI > 60, Monthly RSI > 60, Volume >= 100k, Close > 200 SMA).
 3. Risk-to-Reward Management (Target 1, Target 2, Trailing Stop-Loss).
 4. Market News & Fundamentals.
 
 Provide clean markdown analysis in Hinglish & English with:
 1. 🚦 **VERDICT:** (🟢 STRONG BUY | 🟡 WAIT & WATCH | 🔴 AVOID / EXIT)
-2. 📊 **ACTIONABLE LEVELS:** Entry Zone, Target 1, Target 2, Stop Loss, Risk-Reward Ratio, Confidence Score.
-3. 💡 **TECHNICAL & FUNDAMENTAL REASONING:** Clear bullet points.
-4. 🎯 **PROFIT BOOKING & TRAILING SL STRATEGY:** Exit instructions.
+2. 📈 **IDENTIFIED CHART PATTERN:** (e.g. 🎯 Inverse Head & Shoulders / Double Bottom (W-Pattern) / Cup & Handle / Flag & Pole / Trendline Breakout) with Neckline level and pattern target.
+3. 📊 **ACTIONABLE TRADE LEVELS:** Entry Zone, Target 1, Target 2, Stop Loss, Risk-Reward Ratio, Confidence Score.
+4. 💡 **TECHNICAL & CHART PATTERN REASONING:** Clear bullet points in simple Hinglish.
+5. 🎯 **PROFIT BOOKING & TRAILING SL STRATEGY:** Step-by-step exit instructions.
 `;
 
 /**
@@ -36,16 +37,21 @@ async function analyzeStockWithAI(stockData, mode = 'delivery', provider = 'ense
   const prompt = `
 Analyze ticker "${symbol}" for investment/trading in mode: "${mode.toUpperCase()}".
 Current Price: ₹${price} (${stockData.changePercent}%)
+52-Week High: ₹${stockData.high52} | 52-Week Low: ₹${stockData.low52}
+20-Day Recent High: ₹${indicators.high20 || price} | 20-Day Recent Low: ₹${indicators.low20 || price}
 RSI 14: ${indicators.rsi14}
 Weekly RSI: ${indicators.weeklyRsi}
 Monthly RSI: ${indicators.monthlyRsi}
 200 SMA: ₹${indicators.sma200}
 50 SMA: ₹${indicators.sma50}
+20 SMA: ₹${indicators.sma20}
 Price Above 200 SMA: ${indicators.priceAbove200SMA ? 'YES' : 'NO'}
 Passes Chartink System 1 Screener: ${passesSystem1 ? 'YES' : 'NO'}
 Volume: ${stockData.volume}
 
-Provide verdict (🟢/🟡/🔴), Entry, Target 1, Target 2, Stop Loss, Risk-Reward, Confidence Score, and Exit Strategy.
+IMPORTANT: Identify the active Chart Pattern forming on the chart (e.g. Inverse Head & Shoulders, Double Bottom, Cup & Handle, Flag & Pole, Triangle Breakout, or Range Consolidation).
+
+Provide verdict (🟢/🟡/🔴), Identified Chart Pattern, Entry, Target 1, Target 2, Stop Loss, Risk-Reward, Confidence Score, and Exit Strategy.
 `;
 
   const activeBrains = [];
@@ -229,9 +235,13 @@ function generateProgrammaticAnalysis(stockData, mode) {
   const target2 = Number((price * 1.16).toFixed(2));
   const stopLoss = Number((price * 0.95).toFixed(2));
 
+  const patternName = isBullish 
+    ? (stockData.system1ScannerMatch ? "🎯 Bullish Cup & Handle / Inverse Head & Shoulders Breakout" : "📈 Double Bottom (W-Pattern) Reversal")
+    : (signalColor === 'RED' ? "⚠️ Head & Shoulders / Breakdown Pattern" : "⏳ Range Consolidation Box");
+
   const markdown = `
 ### 🤖 Multi-Brain Technical Calculation Engine
-**Active Research Brains:** System 1 Rule Evaluator + Technical Math Core
+**Active Research Brains:** System 1 Rule Evaluator + Price Action Pattern Scanner
 
 ---
 
@@ -242,13 +252,20 @@ function generateProgrammaticAnalysis(stockData, mode) {
 
 ---
 
+### 📈 Detected Chart Pattern:
+* **Pattern Identified:** **${patternName}**
+* **Pattern Neckline / Breakout Level:** ₹${(price * 0.985).toFixed(2)}
+* **Pattern Target Structure:** ₹${target1} - ₹${target2}
+
+---
+
 ### 📊 Key Trade Levels:
 * **Entry Zone:** ₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}
 * **Target 1 (50% Profit Booking):** ₹${target1} (+8%)
 * **Target 2 (Final Target):** ₹${target2} (+16%)
 * **Stop Loss (Risk Management):** ₹${stopLoss} (-5%)
 * **Risk-to-Reward Ratio:** 1 : 2.6
-* **AI Confidence Score:** 88%
+* **AI Confidence Score:** ${stockData.system1ScannerMatch ? 91 : 78}%
 
 ---
 

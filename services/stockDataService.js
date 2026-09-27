@@ -157,6 +157,11 @@ async function getStockQuoteAndIndicators(symbolInput) {
       currentPrice > sma200
     );
 
+    const recentHighs = highs.slice(-20);
+    const recentLows = lows.slice(-20);
+    const high20 = recentHighs.length > 0 ? Math.max(...recentHighs) : currentPrice;
+    const low20 = recentLows.length > 0 ? Math.min(...recentLows) : currentPrice;
+
     return {
       symbol: displayName,
       fullSymbol: symbol,
@@ -174,6 +179,8 @@ async function getStockQuoteAndIndicators(symbolInput) {
         sma200: Number(sma200.toFixed(2)),
         sma50: Number(sma50.toFixed(2)),
         sma20: Number(sma20.toFixed(2)),
+        high20: Number(high20.toFixed(2)),
+        low20: Number(low20.toFixed(2)),
         macd: Number(macdData.macd.toFixed(2)),
         signal: Number(macdData.signal.toFixed(2)),
         histogram: Number(macdData.histogram.toFixed(2)),
