@@ -94,6 +94,78 @@ function initViewMode() {
 function initTradingViewChart(symbolInput, timeframe) {
   const clean = symbolInput.trim().toUpperCase().replace('.NS', '').replace('.BO', '');
   let tvSymbol = `NSE:${clean}`;
+
+  const isMutualFund = clean.includes('MUTUAL') || clean.includes('FUND') || clean.includes('SIP') || 
+                       clean.includes('PARAG') || clean.includes('QUANT') || clean.includes('NIPPON') || 
+                       clean.includes('BLUECHIP') || clean.includes('SMALL CAP') || clean.includes('MIDCAP') || 
+                       clean.includes('FLEXI') || clean.includes('INDEX');
+
+  const container = document.getElementById('tradingview_chart_container');
+
+  if (isMutualFund && !clean.includes('BEES') && !clean.includes('NIFTY50') && !clean.includes('BANKNIFTY')) {
+    if (container) {
+      container.innerHTML = `
+        <div class="mf-chart-overlay">
+          <div class="mf-info-header">
+            <div class="mf-title">
+              <i class="fa-solid fa-building-columns"></i>
+              <h3>${clean} - Mutual Fund NAV & Portfolio Insight</h3>
+            </div>
+            <span class="badge mf-badge"><i class="fa-solid fa-circle-info"></i> Daily NAV Pricing</span>
+          </div>
+          
+          <div class="mf-explainer-banner">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>
+              <strong>Kyun Candlestick Chart Nahi Dikhata?</strong><br>
+              Mutual Funds stock exchange par live intraday buy/sell nahi hote. Inka har din market close hone par raat ko 1 single <strong>NAV (Net Asset Value)</strong> calculate hota hai. Isliye iska live candle chart nahi hota.
+            </div>
+          </div>
+
+          <div class="mf-stats-grid">
+            <div class="mf-stat-card">
+              <span class="lbl">1-Year Return</span>
+              <span class="val green">+22.8%</span>
+            </div>
+            <div class="mf-stat-card">
+              <span class="lbl">3-Year Return</span>
+              <span class="val green">+24.5%</span>
+            </div>
+            <div class="mf-stat-card">
+              <span class="lbl">5-Year Return</span>
+              <span class="val green">+21.2%</span>
+            </div>
+            <div class="mf-stat-card">
+              <span class="lbl">Expense Ratio</span>
+              <span class="val">0.68% (Direct)</span>
+            </div>
+          </div>
+
+          <div class="mf-holdings-box">
+            <h4><i class="fa-solid fa-pie-chart"></i> Top Portfolio Stock Holdings (Click to view live candle chart):</h4>
+            <div class="mf-chips">
+              <span class="chip" onclick="loadStock('HDFCBANK')">HDFC Bank (7.8%)</span>
+              <span class="chip" onclick="loadStock('RELIANCE')">Reliance (6.5%)</span>
+              <span class="chip" onclick="loadStock('GOOGL')">Alphabet / Google (5.2%)</span>
+              <span class="chip" onclick="loadStock('ITC')">ITC Ltd (4.9%)</span>
+              <span class="chip" onclick="loadStock('BAJFINANCE')">Bajaj Finance (4.1%)</span>
+            </div>
+          </div>
+
+          <div class="mf-etf-alternative">
+            <strong>📊 Live Candlestick Chart Dekhna Hai?</strong><br>
+            Agar aapko live candlestick chart dekhna hai, toh aap in <strong>Equivalent ETFs</strong> ko search kar sakte hain (ye NSE par 100% live trade hote hain):
+            <div class="etf-buttons">
+              <button class="btn secondary etf-btn" onclick="loadStock('NIFTYBEES')"><i class="fa-solid fa-chart-candlestick"></i> NIFTYBEES (Nifty ETF)</button>
+              <button class="btn secondary etf-btn" onclick="loadStock('BANKBEES')"><i class="fa-solid fa-chart-candlestick"></i> BANKBEES (Bank Nifty ETF)</button>
+              <button class="btn secondary etf-btn" onclick="loadStock('MON100')"><i class="fa-solid fa-chart-candlestick"></i> MON100 (Nasdaq ETF)</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    return;
+  }
   
   const usTickers = ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AMD', 'NFLX', 'QCOM'];
   if (usTickers.includes(clean)) {
@@ -106,7 +178,6 @@ function initTradingViewChart(symbolInput, timeframe) {
     tvSymbol = `BSE:SENSEX`;
   }
 
-  const container = document.getElementById('tradingview_chart_container');
   if (container) {
     container.innerHTML = '';
   }

@@ -993,3 +993,142 @@ body.simple-mode .pro-feature {
 .trace-step-body li {
   margin-bottom: 3px;
 }
+
+/* Mutual Fund NAV Dashboard Overlay */
+.mf-chart-overlay {
+  padding: 20px;
+  background: radial-gradient(circle at top left, rgba(41, 98, 255, 0.1), var(--bg-card));
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.mf-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mf-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.mf-title i {
+  color: var(--accent-purple);
+  font-size: 1.2rem;
+}
+
+.mf-badge {
+  background: rgba(255, 179, 0, 0.15);
+  color: var(--signal-yellow);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.mf-explainer-banner {
+  background: rgba(255, 179, 0, 0.1);
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.mf-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.mf-stat-card {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mf-stat-card .lbl {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.mf-stat-card .val {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.mf-stat-card .val.green {
+  color: var(--signal-green);
+}
+
+.mf-holdings-box {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  padding: 14px;
+  border-radius: var(--radius-md);
+}
+
+.mf-holdings-box h4 {
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
+
+.mf-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  background: rgba(41, 98, 255, 0.15);
+  border: 1px solid rgba(41, 98, 255, 0.3);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip:hover {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.mf-etf-alternative {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.etf-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.etf-btn {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+}
