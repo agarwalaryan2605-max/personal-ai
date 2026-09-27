@@ -361,6 +361,49 @@
     </div>
   </div>
 
+  <!-- Floating AI Assistant Copilot Trigger Button -->
+  <button id="openCopilotBtn" class="floating-copilot-btn" title="Ask App AI Guide">
+    <i class="fa-solid fa-robot"></i>
+    <span>Ask App Guide</span>
+  </button>
+
+  <!-- AI Copilot Chat Modal / Drawer -->
+  <div class="copilot-drawer-overlay" id="copilotModal">
+    <div class="copilot-card">
+      <div class="copilot-header">
+        <div class="copilot-brand">
+          <i class="fa-solid fa-robot"></i>
+          <div>
+            <h3>Stock AI Guide Assistant</h3>
+            <span class="sub">App Concierge & Trading Helper</span>
+          </div>
+        </div>
+        <button class="copilot-close-btn" id="closeCopilotBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="copilot-body" id="copilotMessages">
+        <div class="copilot-msg bot">
+          👋 <strong>Namaste! Main Stock AI ka official Assistant Guide hoon.</strong><br>
+          Aap mujhse app ke kisi bhi feature, button, Mutual Funds, ya trading concepts ke baare me kuch bhi pooch sakte hain!
+        </div>
+
+        <div class="copilot-chips">
+          <span class="copilot-chip" onclick="sendCopilotPreset('Is App ko kaise use karein?')">💡 App Kaise Use Karein?</span>
+          <span class="copilot-chip" onclick="sendCopilotPreset('Mutual Fund search kaise karein?')">🏛️ Mutual Funds Search</span>
+          <span class="copilot-chip" onclick="sendCopilotPreset('Portfolio Stop Loss Alert kaise lagayein?')">💼 Stop Loss Alerts</span>
+          <span class="copilot-chip" onclick="sendCopilotPreset('Simple View aur Pro View me kya farak hai?')">⚡ Simple vs Pro View</span>
+        </div>
+      </div>
+
+      <div class="copilot-footer">
+        <form id="copilotForm" class="copilot-input-form">
+          <input type="text" id="copilotInput" placeholder="App ke baare me kuch bhi poochein..." autocomplete="off">
+          <button type="submit" class="btn primary" id="sendCopilotBtn"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

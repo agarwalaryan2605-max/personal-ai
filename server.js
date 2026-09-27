@@ -157,6 +157,97 @@ app.post('/api/portfolio/alerts', async (req, res) => {
   }
 });
 
+// 9. In-App AI Guide Copilot Endpoint
+app.post('/api/copilot/chat', async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    const copilotSystemPrompt = `
+You are "Stock AI Assistant Guide" — the official embedded AI Concierge & Helper for this Stock Market AI Terminal.
+Your job is to answer user questions about how to use this app, where to find features, stock market concepts, Chartink screeners, Mutual Funds, and Portfolio alerts in clear, friendly Hinglish.
+
+App Knowledge Base:
+1. Search Bar & Autocomplete: Top header. Type any Indian stock (NSE/BSE), Mutual Fund, or US stock (e.g. Tata Motors, Reliance, NVDA, Parag Parikh). Shows live dropdown suggestions.
+2. Mode A (Stock Analysis): Enter stock name -> Generates 🚦 Verdict (🟢 STRONG BUY, 🟡 WAIT, 🔴 AVOID), ⏱️ Recommended Holding Period, Entry Zone, Target 1, Target 2, Stop Loss, and Chart Pattern.
+3. Mode B (Auto Top Picks): Bottom tab "Mode B: Auto Top AI Picks". Shows daily automated scanner picks matching Weekly & Monthly RSI > 60 + 200 SMA.
+4. Simple View vs Pro View Toggle: Top header. "Simple View" hides technical clutter for beginners. "Pro View" shows RSI, 200 SMA, MACD, and AI Model Selectors.
+5. Chartink Screener Parser: Bottom tab "Chartink URL Parser". Paste any Chartink link to import scanning formulas.
+6. My Portfolio & Exit Alerts: Bottom tab "My Portfolio & Exit Alerts". Add your buy price & quantity to get automated Target 1 / Target 2 / Trailing Stop-Loss exit alerts.
+7. Step-by-Step AI Research Trace: Bottom tab "Step-by-Step AI Research Trace" or inline button under AI Analysis card. Shows 5-step detailed audit timeline of how AI fetched data and calculated targets.
+8. Mutual Funds: Mutual Funds calculate daily NAVs, not intraday candles. Searching a Mutual Fund displays a custom NAV Performance Overlay + Top Stock Holdings + Equivalent Index ETF suggestions.
+
+Always respond in polite, clear Hinglish with short bullet points and helpful emojis.
+`;
+
+    let reply = "";
+
+    // Try Gemini API first if available
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
+      try {
+        const { GoogleGenerativeAI } = require('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: copilotSystemPrompt });
+        const result = await model.sendMessage(message);
+        reply = result.response.text();
+      } catch (e) {
+        console.warn('Gemini Copilot failed, trying Groq fallback...', e.message);
+      }
+    }
+
+    // Try Groq API fallback if Gemini is not configured or failed
+    if (!reply && process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+      try {
+        const axios = require('axios');
+        const groqRes = await axios.post(
+          'https://api.groq.com/openai/v1/chat/completions',
+          {
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              { role: 'system', content: copilotSystemPrompt },
+              { role: 'user', content: message }
+            ],
+            temperature: 0.3
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY.trim()}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 10000
+          }
+        );
+        reply = groqRes.data?.choices?.[0]?.message?.content || "";
+      } catch (e) {
+        console.warn('Groq Copilot failed:', e.message);
+      }
+    }
+
+    // Programmatic Smart Fallback if no API keys configured
+    if (!reply) {
+      const msg = message.toLowerCase();
+      if (msg.includes('search') || msg.includes('stock') || msg.includes('kaise')) {
+        reply = "🔍 **Stock Search Kaise Karein?**\n* Top header bar me stock name (e.g. *Tata Motors*, *Reliance*, *Nifty*) type karein.\n* Dropdown suggestions aane par select karke `Analyze Stock` click karein!";
+      } else if (msg.includes('portfolio') || msg.includes('alert') || msg.includes('stop loss')) {
+        reply = "💼 **Portfolio Exit Alerts Kaise Use Karein?**\n* Niche **My Portfolio & Exit Alerts** tab par jayein.\n* Apne stock ka Buy Price & Qty add karein. AI aapko Target 1 (+8%) aur Stop Loss (-5%) hit hote hi exit alerts batayega!";
+      } else if (msg.includes('mutual fund') || msg.includes('nav') || msg.includes('chart')) {
+        reply = "🏛️ **Mutual Funds Kaise Dekhein?**\n* Search bar me Mutual Fund name type karein (e.g. *Parag Parikh*, *Quant Small Cap*).\n* Mutual Funds me daily NAV hota hai, isliye candle chart ki jagah NAV Performance Dashboard + Top Holdings dikhai dengi!";
+      } else if (msg.includes('simple') || msg.includes('pro')) {
+        reply = "⚡ **Simple View vs 📊 Pro View Toggle:**\n* Top header me `Simple View` (beginners ke liye clean UI) aur `Pro View` (full technical RSI & SMA indicators) switch kar sakte hain!";
+      } else {
+        reply = `🤖 **Stock AI Guide:** Aap search bar se koi bhi Stock/Mutual Fund analyze kar sakte hain. Aapka query: "${message}". Aap Header me ` + "`Simple View`" + ` / ` + "`Pro View`" + ` switch kar sakte hain!`;
+      }
+    }
+
+    res.json({ success: true, reply });
+
+  } catch (error) {
+    res.status(500).json({ error: 'Copilot AI error: ' + error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`🚀 Stock Market AI Terminal running at:`);

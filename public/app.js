@@ -609,6 +609,66 @@ function setupEventListeners() {
   closeSettingsModal.addEventListener('click', closeModal);
   cancelSettingsBtn.addEventListener('click', closeModal);
 
+  // Floating Copilot AI Assistant Modal Handlers
+  const openCopilotBtn = document.getElementById('openCopilotBtn');
+  const closeCopilotBtn = document.getElementById('closeCopilotBtn');
+  const copilotModal = document.getElementById('copilotModal');
+  const copilotForm = document.getElementById('copilotForm');
+  const copilotInput = document.getElementById('copilotInput');
+  const copilotMessages = document.getElementById('copilotMessages');
+
+  if (openCopilotBtn && copilotModal) {
+    openCopilotBtn.addEventListener('click', () => copilotModal.classList.add('active'));
+    closeCopilotBtn?.addEventListener('click', () => copilotModal.classList.remove('active'));
+  }
+
+  window.sendCopilotPreset = function(text) {
+    if (copilotInput) copilotInput.value = text;
+    submitCopilotMessage(text);
+  };
+
+  copilotForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = copilotInput?.value.trim();
+    if (text) submitCopilotMessage(text);
+  });
+
+  async function submitCopilotMessage(text) {
+    if (!text || !copilotMessages) return;
+    
+    // Render user message
+    const userDiv = document.createElement('div');
+    userDiv.className = 'copilot-msg user';
+    userDiv.innerText = text;
+    copilotMessages.appendChild(userDiv);
+    if (copilotInput) copilotInput.value = '';
+
+    // Render typing indicator
+    const botDiv = document.createElement('div');
+    botDiv.className = 'copilot-msg bot';
+    botDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guide AI is typing...';
+    copilotMessages.appendChild(botDiv);
+    copilotMessages.scrollTop = copilotMessages.scrollHeight;
+
+    try {
+      const res = await fetch('/api/copilot/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      
+      if (window.marked && data.reply) {
+        botDiv.innerHTML = marked.parse(data.reply);
+      } else {
+        botDiv.innerText = data.reply || 'Assistant error';
+      }
+    } catch (err) {
+      botDiv.innerText = '⚠️ Copilot Error: ' + err.message;
+    }
+    copilotMessages.scrollTop = copilotMessages.scrollHeight;
+  }
+
   saveSettingsBtn.addEventListener('click', async () => {
     const geminiKey = geminiKeyInput.value.trim();
     const groqKey = document.getElementById('groqKeyInput')?.value.trim() || '';
