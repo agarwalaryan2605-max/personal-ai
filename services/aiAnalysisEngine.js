@@ -205,6 +205,15 @@ function parseAIAnalysisOutput(aiText, stockData, activeBrains = ["Google Gemini
     if (!isNaN(parsed) && parsed > 0) stopLoss = parsed;
   }
 
+  let holdingPeriod = "1 to 3 Months (Delivery)";
+  if (stockData.symbol.includes("MUTUAL") || stockData.symbol.includes("FUND") || stockData.symbol.includes("PARAG") || stockData.symbol.includes("QUANT")) {
+    holdingPeriod = "3 to 5+ Years (Long Term SIP)";
+  } else if (aiText.includes("Intraday") || aiText.includes("1 Day")) {
+    holdingPeriod = "1 Day (Intraday Exit)";
+  } else if (aiText.includes("Swing") || aiText.includes("1-4 Weeks") || aiText.includes("2-4 Weeks")) {
+    holdingPeriod = "1 to 4 Weeks (Swing Trade)";
+  }
+
   return {
     symbol: stockData.symbol,
     price,
@@ -212,6 +221,7 @@ function parseAIAnalysisOutput(aiText, stockData, activeBrains = ["Google Gemini
     signalColor,
     verdict,
     activeBrains,
+    holdingPeriod,
     entryZone: `₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}`,
     target1,
     target2,
@@ -235,6 +245,10 @@ function generateProgrammaticAnalysis(stockData, mode) {
   const target2 = Number((price * 1.16).toFixed(2));
   const stopLoss = Number((price * 0.95).toFixed(2));
 
+  let holdingPeriod = "1 to 4 Weeks (Swing Trade)";
+  if (mode === 'intraday') holdingPeriod = "1 Day (Same-Day Exit)";
+  else if (mode === 'mf') holdingPeriod = "3 to 5+ Years (Long Term SIP)";
+
   const patternName = isBullish 
     ? (stockData.system1ScannerMatch ? "🎯 Bullish Cup & Handle / Inverse Head & Shoulders Breakout" : "📈 Double Bottom (W-Pattern) Reversal")
     : (signalColor === 'RED' ? "⚠️ Head & Shoulders / Breakdown Pattern" : "⏳ Range Consolidation Box");
@@ -248,7 +262,8 @@ function generateProgrammaticAnalysis(stockData, mode) {
 ### 🚦 Verdict: ${signalColor === 'GREEN' ? '🟢 STRONG BUY' : (signalColor === 'YELLOW' ? '🟡 WAIT & WATCH' : '🔴 AVOID / EXIT')}
 
 **Mode:** ${mode.toUpperCase()}  
-**Current Price:** ₹${price} (${stockData.changePercent}%)
+**Current Price:** ₹${price} (${stockData.changePercent}%)  
+**⏱️ Recommended Holding Period:** **${holdingPeriod}**
 
 ---
 
@@ -260,6 +275,7 @@ function generateProgrammaticAnalysis(stockData, mode) {
 ---
 
 ### 📊 Key Trade Levels:
+* **Recommended Holding Period:** ⏱️ **${holdingPeriod}**
 * **Entry Zone:** ₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}
 * **Target 1 (50% Profit Booking):** ₹${target1} (+8%)
 * **Target 2 (Final Target):** ₹${target2} (+16%)
@@ -277,8 +293,9 @@ function generateProgrammaticAnalysis(stockData, mode) {
 ---
 
 ### 🎯 Profit Booking & Exit Strategy:
-1. **Target 1 (₹${target1}):** Jaise hi pehla target hit ho, 50% quantities sell karke profit lock kar lein.
-2. **Trailing Stop-Loss:** Target 1 ke baad Stop Loss ko trailing karke cost price (₹${price}) par le aayein taaki zero loss risk rahe!
+1. **Holding Timeframe:** Is position ko **${holdingPeriod}** tak hold kar sakte hain.
+2. **Target 1 (₹${target1}):** Jaise hi pehla target hit ho, 50% quantities sell karke profit lock kar lein.
+3. **Trailing Stop-Loss:** Target 1 ke baad Stop Loss ko trailing karke cost price (₹${price}) par le aayein taaki zero loss risk rahe!
 `;
 
   return {
@@ -288,6 +305,17 @@ function generateProgrammaticAnalysis(stockData, mode) {
     signalColor,
     verdict,
     activeBrains: ["System 1 Rule Engine"],
+    holdingPeriod,
+    entryZone: `₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}`,
+    target1,
+    target2,
+    stopLoss,
+    riskReward: "1 : 2.6",
+    confidenceScore: 88,
+    markdownAnalysis: markdown,
+    indicators: stockData.technicalIndicators,
+    system1Match: stockData.system1ScannerMatch
+  };
     entryZone: `₹${(price * 0.99).toFixed(2)} - ₹${(price * 1.005).toFixed(2)}`,
     target1,
     target2,

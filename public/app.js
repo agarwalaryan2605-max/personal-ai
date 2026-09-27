@@ -253,6 +253,11 @@ function updateUIWithAnalysis(stockData, aiAnalysis) {
   target2Text.innerText = `${stockData.currency === 'INR' ? '₹' : '$'}${aiAnalysis.target2.toFixed(2)}`;
   stopLossText.innerText = `${stockData.currency === 'INR' ? '₹' : '$'}${aiAnalysis.stopLoss.toFixed(2)}`;
 
+  const holdingPeriodText = document.getElementById('holdingPeriodText');
+  if (holdingPeriodText) {
+    holdingPeriodText.innerText = `⏱️ ${aiAnalysis.holdingPeriod || '1 to 4 Weeks'}`;
+  }
+
   // Update Traffic Light Badge
   trafficBadge.className = `traffic-light-badge ${aiAnalysis.signalColor.toLowerCase()}`;
   verdictText.innerText = aiAnalysis.verdict;
@@ -379,6 +384,7 @@ async function fetchTopPicks() {
           <div style="font-size:1.1rem; font-weight:700; margin-bottom:4px;">
             ₹${pick.price.toFixed(2)} <span style="font-size:0.8rem; color:#00c805;">(+${pick.changePercent}%)</span>
           </div>
+          <div style="font-size:0.75rem; color:#2962ff; font-weight:600; margin-bottom:3px;">⏱️ Holding: ${pick.holdingPeriod || '1-4 Weeks'}</div>
           <div style="font-size:0.75rem; color:#787b86; margin-bottom:8px;">Target 1: ₹${pick.target1} | SL: ₹${pick.stopLoss}</div>
           <div style="font-size:0.78rem; line-height:1.4;">${pick.reasoning}</div>
         `;

@@ -584,6 +584,15 @@ body.simple-mode .pro-feature {
   gap: 2px;
 }
 
+.level-box.full-width-level {
+  grid-column: 1 / -1;
+  background: rgba(41, 98, 255, 0.1);
+  border: 1px solid rgba(41, 98, 255, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2px;
+}
+
 .level-box .lbl {
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -596,6 +605,7 @@ body.simple-mode .pro-feature {
 
 .green-text { color: var(--signal-green); }
 .red-text { color: var(--signal-red); }
+.blue-text { color: var(--accent-blue); }
 
 /* Indicators Bar */
 .indicators-bar {
